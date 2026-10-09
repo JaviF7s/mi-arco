@@ -18,6 +18,11 @@ App web de estadísticas de lanzamiento: arco por zonas, partidos y entrenamient
 | `data-inicial.json` | Datos de la versión anterior; se importan con un botón la primera vez |
 | `manifest.webmanifest`, `icon-*.png` | Para instalarla como app en el celular |
 
+## Cuentas
+
+- Cada jugador tiene su propia cuenta y sus datos viven en `usuarios/<uid>/…`. Solo él puede editarlos.
+- El administrador (`javi@miarco.app`, definido en `ADMINS` en `index.html` y en `firestore.rules`) puede ver cualquier cuenta en solo lectura con el selector de arriba.
+
 ## Crear la cuenta de un compañero
 
 1. Firebase → **Authentication** → **Users** → **Add user**.

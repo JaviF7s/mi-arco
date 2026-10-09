@@ -1,9 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Solo pueden leer y escribir los jugadores con cuenta (las cuentas las crea el administrador).
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'javi@miarco.app';
+    }
+    // Cada jugador lee y escribe solo su cuenta. El administrador puede leer todas (sin editarlas).
+    match /usuarios/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == uid;
+      match /{rest=**} {
+        allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+    // Datos de la versión anterior: solo el administrador (para moverlos a su cuenta).
+    match /{coleccion}/{docId} {
+      allow read, write: if isAdmin() && coleccion in ['perfil', 'partidos', 'companeros'];
     }
   }
 }

@@ -158,6 +158,7 @@ svg.goal{width:100%;height:auto;display:block}
 .evo svg{width:100%;min-width:420px;height:auto;display:block}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:14px;z-index:5}
 @media (max-width:520px){#sharePanel{grid-template-columns:1fr!important;justify-items:start}}
+.notice.viewing{border-style:solid;border-color:var(--accent);color:var(--ink);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:20;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 18px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 .login{position:fixed;inset:0;z-index:10;background:var(--bg);display:grid;place-items:center;padding:16px}
 #qrBox img,#qrBox canvas{width:100%!important;height:auto!important;display:block}
@@ -185,6 +186,7 @@ svg.goal{width:100%;height:auto;display:block}
     </div>
     <div class="row">
       <span class="hint" id="whoami"></span>
+      <select id="acctSel" aria-label="Ver cuenta de" hidden style="width:auto;max-width:220px"></select>
       <button id="shareBtn" class="ghost">Compartir</button>
       <button id="logoutBtn" class="ghost">Salir</button>
       <div class="count" id="countdown"><b class="num" id="days">–</b><span>días para el Nacional · 22 nov</span></div>
@@ -199,8 +201,9 @@ svg.goal{width:100%;height:auto;display:block}
     </div>
   </section>
   <div class="notice" id="modeNotice" hidden></div>
+  <div class="notice viewing" id="viewNotice" hidden></div>
   <div class="notice" id="importBox" hidden style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-    <span>La base de datos está vacía. ¿Traer tu ficha, tu foto y tus partidos de la versión anterior?</span>
+    <span>Tu cuenta está vacía. ¿Traer tu ficha, tu foto y tus partidos de la versión anterior?</span>
     <button class="primary" id="importBtn">Importar mis datos</button>
   </div>
 
@@ -269,7 +272,7 @@ svg.goal{width:100%;height:auto;display:block}
   </section>
 
   <!-- Barra de registro -->
-  <section class="panel entry" aria-label="Registrar lanzamientos">
+  <section class="panel entry" id="entryPanel" aria-label="Registrar lanzamientos">
     <div class="row" style="justify-content:space-between">
       <h2 style="font-size:22px" id="entryTitle">Registrar sesión</h2>
       <div class="row">
@@ -545,7 +548,7 @@ function renderEntry(){
   chips($('sitChips'),SITS,state.sit,'sit');chips($('posChips'),POSS,state.pos,'pos');
   const m=cur(), can=writable&&!!m;
   ['bGol','bAta'].forEach(id=>$(id).disabled=!can||state.zone==null);$('bFue').disabled=!can;
-  $('undoBtn').disabled=!can||!mine(m.shots).length;$('newMatchBtn').disabled=!writable;
+  $('entryPanel').hidden=!writable&&!local;$('undoBtn').disabled=!can||!mine(m.shots).length;$('newMatchBtn').disabled=!writable;
   $('zoneHint').innerHTML=!m?'Crea una sesión (partido o entrenamiento) para empezar a registrar.':state.zone==null?'Toca una zona del arco y marca el resultado. «Fuera / poste» no necesita zona.':`Zona elegida: <span class="zonelabel">${zoneName(state.zone)}</span>. ¿Cómo terminó?`;
   const last=m&&mine(m.shots).slice(-1)[0];
   $('lastShot').textContent=last?`Último: ${RES[last.r]} · ${zoneName(last.z)} · ${SITS.find(x=>x[0]===last.s)[1]}`:'';
@@ -744,19 +747,25 @@ Dame: 1) un diagnóstico en 3 líneas, 2) qué copiarle al jugador top de su pos
 
 /* ---------- Inicio: Firebase ---------- */
 const DOMINIO='miarco.app';
+const ADMINS=['javi@'+DOMINIO];
 const toEmail=u=>{u=u.trim().toLowerCase();return u.includes('@')?u:`${u}@${DOMINIO}`};
-function adapter(fs){
+const userName=e=>(e||'').replace('@'+DOMINIO,'');
+let FS=null,ME=null,isAdmin=false,viewing=null,users=[];
+function adapter(fs,base){
+  const P=p=>base?`${base}/${p}`:p;
   const wrapDoc=s=>({id:s.id,exists:s.exists(),data:()=>s.data()});
   return {
-    doc:p=>({set:d=>setDoc(doc(fs,p),d),delete:()=>deleteDoc(doc(fs,p)),get:async()=>wrapDoc(await getDoc(doc(fs,p))),
-      onSnapshot:(n,e)=>onSnapshot(doc(fs,p),s=>n(wrapDoc(s)),e)}),
-    collection:p=>({orderBy:(f,d)=>({onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),orderBy(f,d||'asc')),q=>n({docs:q.docs.map(wrapDoc),empty:q.empty}),e)}),
-      get:async()=>{const q=await getDocs(collection(fs,p));return {empty:q.empty,docs:q.docs.map(wrapDoc)}}})
+    doc:p=>({set:d=>setDoc(doc(fs,P(p)),d),delete:()=>deleteDoc(doc(fs,P(p))),get:async()=>wrapDoc(await getDoc(doc(fs,P(p)))),
+      onSnapshot:(n,e)=>onSnapshot(doc(fs,P(p)),s=>n(wrapDoc(s)),e)}),
+    collection:p=>({orderBy:(f,d)=>({onSnapshot:(n,e)=>onSnapshot(query(collection(fs,P(p)),orderBy(f,d||'asc')),q=>n({docs:q.docs.map(wrapDoc),empty:q.empty}),e)}),
+      get:async()=>{const q=await getDocs(collection(fs,P(p)));return {empty:q.empty,docs:q.docs.map(wrapDoc)}}})
   };
 }
 const unsubs=[];
+function stopData(){unsubs.splice(0).forEach(f=>{try{f()}catch(_){}})}
+function resetState(){Object.assign(state,{profile:{nombre:''},mates:[],playerId:'yo',matches:[],currentId:null,zone:null,editing:false,refGroup:null,refIdx:0,confirmDel:null,confirmMate:false})}
 function startData(){
-  db.doc('perfil/jugador').onSnapshot(snap=>{if(snap.exists&&!state.editing){state.profile={...snap.data()};render()}checkEmpty()},()=>{});
+  unsubs.push(db.doc('perfil/jugador').onSnapshot(snap=>{if(snap.exists&&!state.editing){state.profile={...snap.data()};render()}},()=>{}));
   unsubs.push(db.collection('companeros').orderBy('creado','asc').onSnapshot(snap=>{if(state.editing&&state.playerId!=='yo')return;
     state.mates=snap.docs.map(x=>({id:x.id,...x.data()}));if(state.playerId!=='yo'&&!state.mates.some(m=>m.id===state.playerId))state.playerId='yo';render()},()=>{}));
   unsubs.push(db.collection('partidos').orderBy('creado','desc').onSnapshot(snap=>{
@@ -764,42 +773,81 @@ function startData(){
     state.matches=snap.docs.map(x=>writing[x.id]&&loc[x.id]?loc[x.id]:{id:x.id,...x.data()});
     for(const id in writing)if(loc[id]&&!state.matches.some(m=>m.id===id))state.matches.unshift(loc[id]);
     if(!state.matches.some(m=>m.id===state.currentId))state.currentId=state.matches[0]?.id||null;
-    render();checkEmpty();
+    render();
   },e=>toast('Se perdió la conexión con tus datos. Recarga la página.')));
 }
-let emptyChecked=false;
-async function checkEmpty(){if(emptyChecked||!db)return;emptyChecked=true;
-  try{const [p,m]=await Promise.all([db.doc('perfil/jugador').get(),db.collection('partidos').get()]);$('importBox').hidden=!(!p.exists&&m.empty)}catch(_){}}
+/* Abre la cuenta de un jugador: la propia se edita, la de otro solo se mira */
+function openAccount(uid){
+  stopData();resetState();viewing=uid;
+  const own=uid===ME.uid;writable=own;
+  db=adapter(FS,'usuarios/'+uid);local=false;
+  const u=users.find(x=>x.id===uid);
+  const n=$('viewNotice');n.hidden=own;
+  if(!own)n.innerHTML=`Estás viendo la cuenta de <b>${esc(u?.nombre||u?.usuario||'otro jugador')}</b> en <b>solo lectura</b>. <button class="ghost" id="backMine">Volver a mi cuenta</button>`;
+  if(!own)$('backMine').onclick=()=>{$('acctSel').value=ME.uid;openAccount(ME.uid)};
+  render();startData();
+}
+function renderAcctSel(){
+  const sel=$('acctSel');sel.hidden=!isAdmin;if(!isAdmin)return;
+  const opts=[{id:ME.uid,label:'Mi cuenta'},...users.filter(u=>u.id!==ME.uid).sort((a,b)=>(a.usuario||'').localeCompare(b.usuario||'')).map(u=>({id:u.id,label:`${u.nombre||u.usuario} (${u.usuario})`}))];
+  sel.innerHTML=opts.map(o=>`<option value="${o.id}"${o.id===viewing?' selected':''}>${esc(o.label)}</option>`).join('');
+}
+async function ensureOwnSpace(user){
+  const mine=adapter(FS,'usuarios/'+user.uid);
+  const meRef=adapter(FS,'').doc('usuarios/'+user.uid);
+  const prev=await meRef.get().catch(()=>({exists:false,data:()=>({})}));
+  const pf=await mine.doc('perfil/jugador').get().catch(()=>({exists:false}));
+  const info={usuario:userName(user.email),visto:Date.now(),...(prev.exists?{nombre:prev.data().nombre||''}:{}),...(pf.exists?{nombre:pf.data().nombre||''}:{})};
+  if(!pf.exists&&isAdmin&&!(prev.exists&&prev.data().migrado)){
+    /* Primera vez del administrador: mover los datos que estaban compartidos a su cuenta */
+    const root=adapter(FS,'');
+    try{const rp=await root.doc('perfil/jugador').get();
+      if(rp.exists){await mine.doc('perfil/jugador').set(rp.data());info.nombre=rp.data().nombre||'';
+        for(const c of ['companeros','partidos']){const q=await root.collection(c).get();for(const d of q.docs)await mine.doc(c+'/'+d.id).set(d.data())}
+        info.migrado=true;toast('Tus datos se movieron a tu cuenta')}
+      else $('importBox').hidden=false}catch(_){$('importBox').hidden=false}
+  }else if(!pf.exists){
+    const nombre=userName(user.email).replace(/^./,c=>c.toUpperCase());
+    await mine.doc('perfil/jugador').set({nombre,creado:Date.now()}).catch(()=>{});info.nombre=nombre;
+  }
+  await meRef.set({...(prev.exists?prev.data():{}),...info}).catch(()=>{});
+}
 $('importBtn').onclick=async()=>{$('importBtn').disabled=true;
   try{const r=await fetch('data-inicial.json',{cache:'no-store'});const d=await r.json();
     if(d.perfil)await db.doc('perfil/jugador').set(d.perfil);
     for(const [id,v] of Object.entries(d.companeros||{}))await db.doc('companeros/'+id).set(v);
     for(const [id,v] of Object.entries(d.partidos||{}))await db.doc('partidos/'+id).set(v);
     $('importBox').hidden=true;toast('Datos importados')}catch(e){toast('No se pudo importar: '+(e.message||e));$('importBtn').disabled=false}};
+$('acctSel').onchange=e=>openAccount(e.target.value);
 render();
 if(!window.FIREBASE_CONFIG||String(window.FIREBASE_CONFIG.apiKey||'').startsWith('PEGA')){showLocal()}
 else{
   const app=initializeApp(window.FIREBASE_CONFIG);
   const auth=getAuth(app);
-  let fs;try{fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(_){fs=getFirestore(app)}
+  try{FS=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(_){FS=getFirestore(app)}
   $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const u=$('lgUser').value,p=$('lgPass').value;if(!u||!p)return;
     $('lgBtn').disabled=true;$('lgMsg').textContent='Entrando…';
     try{await signInWithEmailAndPassword(auth,toEmail(u),p)}
     catch(err){const c=err.code||'';$('lgMsg').textContent=c.includes('invalid')||c.includes('wrong')||c.includes('not-found')?'Usuario o contraseña incorrectos.':c.includes('too-many')?'Demasiados intentos. Espera unos minutos.':c.includes('network')?'Sin conexión a internet.':'No se pudo entrar ('+c+').'}
     finally{$('lgBtn').disabled=false}});
   $('logoutBtn').onclick=()=>signOut(auth);
-  onAuthStateChanged(auth,user=>{
-    if(!user){$('login').hidden=false;$('logoutBtn').hidden=true;$('whoami').textContent='';unsubs.splice(0).forEach(f=>f());db=null;local=true;return}
-    $('login').hidden=true;$('logoutBtn').hidden=false;$('whoami').textContent=user.email.replace('@'+DOMINIO,'');
-    $('lgPass').value='';$('lgMsg').textContent='';
-    db=adapter(fs);local=false;writable=true;emptyChecked=false;render();startData();
+  let usersUnsub=null;
+  onAuthStateChanged(auth,async user=>{
+    if(!user){$('login').hidden=false;$('logoutBtn').hidden=true;$('whoami').textContent='';$('acctSel').hidden=true;$('viewNotice').hidden=true;
+      stopData();if(usersUnsub){usersUnsub();usersUnsub=null}db=null;local=true;ME=null;resetState();render();return}
+    ME=user;isAdmin=ADMINS.includes((user.email||'').toLowerCase());
+    $('login').hidden=true;$('logoutBtn').hidden=false;$('whoami').textContent=userName(user.email)+(isAdmin?' · admin':'');
+    $('lgPass').value='';$('lgMsg').textContent='';$('importBox').hidden=true;
+    await ensureOwnSpace(user);
+    if(isAdmin)usersUnsub=onSnapshot(collection(FS,'usuarios'),q=>{users=q.docs.map(d=>({id:d.id,...d.data()}));renderAcctSel()},()=>{});
+    openAccount(user.uid);renderAcctSel();
   });
 }
 function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice');n.hidden=false;n.textContent='Modo de prueba: falta conectar la base de datos (firebase-config.js). Lo que registres ahora no se guarda.';
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261009041311';
+const APP_VERSION='20261009041928';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
