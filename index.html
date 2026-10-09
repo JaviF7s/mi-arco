@@ -170,7 +170,7 @@ svg.goal{width:100%;height:auto;display:block}
 <div id="login" class="login" hidden>
   <form id="loginForm" class="panel" style="display:grid;gap:12px;width:min(360px,100%)">
     <div><div class="eyebrow">Estadísticas de lanzamiento</div><h1 style="font-size:44px;font-weight:900;line-height:1">Mi Arco</h1></div>
-    <label style="display:grid;gap:4px;font-size:13px;color:var(--muted)">Usuario<input id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="ej. javi"></label>
+    <label style="display:grid;gap:4px;font-size:13px;color:var(--muted)">Usuario<input id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Tu usuario"></label>
     <label style="display:grid;gap:4px;font-size:13px;color:var(--muted)">Contraseña<input id="lgPass" type="password" autocomplete="current-password"></label>
     <button class="primary" type="submit" id="lgBtn">Entrar</button>
     <p class="hint" id="lgMsg" style="margin:0">Pídele tu usuario y contraseña a quien administra el equipo.</p>
@@ -847,7 +847,7 @@ function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261009041928';
+const APP_VERSION='20261009042200';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
