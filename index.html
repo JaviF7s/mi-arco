@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi Arco</title>
+<meta name="description" content="Estadísticas de lanzamiento de handball: arco por zonas, partidos, entrenamientos y comparación con jugadores top.">
+<meta name="theme-color" content="#0F1E2C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Arco">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: ficha del jugador (izq) + arco 3x2 m con zonas (der), barra de registro debajo, luego estadísticas y recomendaciones */
+:root{
+  --bg:#E9EEF3; --surface:#FFFFFF; --surface2:#F3F6F9; --ink:#0F1E2C; --muted:#5A6B7C; --line:#D3DCE5;
+  --accent:#1D5BA8; --accent-ink:#FFFFFF; --post:#D3263B; --post2:#FFFFFF; --net:#B8C6D4;
+  --good:#16955A; --warn:#C98B00; --bad:#D3263B;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B131B; --surface:#132130; --surface2:#1A2B3D; --ink:#E5EDF5; --muted:#93A5B8; --line:#26394D;
+  --accent:#5C9DEB; --accent-ink:#06121E; --post:#E8475A; --post2:#E5EDF5; --net:#2E4258;
+  --good:#3CC783; --warn:#E8B23A; --bad:#EF5B6C; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0B131B; --surface:#132130; --surface2:#1A2B3D; --ink:#E5EDF5; --muted:#93A5B8; --line:#26394D;
+  --accent:#5C9DEB; --accent-ink:#06121E; --post:#E8475A; --post2:#E5EDF5; --net:#2E4258;
+  --good:#3CC783; --warn:#E8B23A; --bad:#EF5B6C; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:.01em}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:34px;font-weight:900;line-height:1}
+.count{display:flex;align-items:baseline;gap:8px;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 12px}
+.count b{font-family:var(--display);font-size:28px;line-height:1}
+.count span{font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.notice{background:var(--surface2);border:1px dashed var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--muted)}
+
+.main{display:grid;grid-template-columns:minmax(250px,.75fr) 1.5fr;gap:16px}
+@media (max-width:780px){.main{grid-template-columns:1fr}}
+
+/* Ficha */
+.card{display:grid;gap:14px;align-content:start}
+.photo{position:relative;aspect-ratio:4/5;max-width:100%;border-radius:8px;overflow:hidden;background:
+  repeating-linear-gradient(135deg,var(--surface2) 0 14px,var(--bg) 14px 28px);display:grid;place-items:center;color:var(--muted)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo .dorsal{position:absolute;right:10px;bottom:6px;font-family:var(--display);font-weight:900;font-size:64px;line-height:1;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.photo .ph{font-size:13px;text-align:center;padding:12px}
+.pname{font-size:30px;font-weight:800;line-height:1}
+.pteam{color:var(--muted);font-size:14px}
+.dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dl div{background:var(--surface2);border-radius:6px;padding:8px 10px}
+.dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.dl dd{margin:0;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.form label{display:grid;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.form .full{grid-column:1/-1}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);padding:8px 12px;font-weight:600}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.ghost{background:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Arco */
+.goalhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;padding:6px 12px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.goalwrap{width:100%;max-width:100%}
+svg.goal{width:100%;height:auto;display:block}
+.zone{cursor:pointer}
+.zone rect.hit{fill:transparent;transition:fill .15s}
+.zone:hover rect.hit{fill:color-mix(in srgb,var(--accent) 12%,transparent)}
+.zone.sel rect.hit{fill:color-mix(in srgb,var(--accent) 26%,transparent);stroke:var(--accent);stroke-width:2}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+/* Registro */
+.entry{display:grid;gap:12px}
+.entry .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:6px 10px;border-radius:999px;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.res button{padding:14px 8px;font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:.03em}
+.res .gol{background:var(--good);border-color:var(--good);color:#fff}
+.res .ata{background:var(--surface2)}
+.res .fue{background:transparent}
+.zonelabel{font-weight:700}
+.hint{font-size:13px;color:var(--muted)}
+
+/* Stats */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface2);border-radius:8px;padding:10px 12px}
+.kpi b{display:block;font-family:var(--display);font-size:32px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:780px){.two{grid-template-columns:1fr}}
+.bars{display:grid;gap:12px}
+.bar .lab{display:flex;justify-content:space-between;font-size:13px;gap:8px}
+.bar .track{position:relative;height:12px;background:var(--surface2);border-radius:6px;margin-top:4px}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.bar .pro{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.bar .none{font-size:12px;color:var(--muted)}
+.tips{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.tip{border-left:4px solid var(--line);background:var(--surface2);border-radius:0 8px 8px 0;padding:10px 12px}
+.tip.ok{border-left-color:var(--good)} .tip.mejora{border-left-color:var(--warn)} .tip.alerta{border-left-color:var(--bad)}
+.tip h3{font-family:var(--body);font-size:15px;font-weight:700}
+.tip p{margin:4px 0 0;font-size:14px;max-width:68ch}
+.coach{white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:12px;font-size:14px;max-width:none}
+.matches{display:grid;gap:6px}
+.match{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;flex-wrap:wrap}
+.match .mn{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.match .ms{font-size:12px;color:var(--muted)}
+.ref{display:grid;grid-template-columns:minmax(220px,.8fr) 1.4fr;gap:16px}
+@media (max-width:780px){.ref{grid-template-columns:1fr}}
+.refid{background:var(--ink);color:var(--bg);border-radius:8px;padding:14px;display:grid;gap:6px;align-content:start}
+.refid .rn{font-family:var(--display);font-size:30px;font-weight:800;line-height:1}
+.refid .rs{font-size:13px;opacity:.8}
+.refid .big{font-family:var(--display);font-size:44px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.vs{display:grid;gap:10px}
+.vsrow .lab{display:flex;justify-content:space-between;gap:8px;font-size:13px;flex-wrap:wrap}
+.vsrow .tr{position:relative;height:10px;background:var(--surface2);border-radius:5px;margin-top:3px}
+.vsrow .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.vsrow .me i{background:var(--accent)} .vsrow .him i{background:var(--muted)}
+.keys{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;max-width:70ch}
+#sources a{color:var(--accent)}
+.tally{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+@media (max-width:560px){.tally{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tally div{background:var(--surface2);border-radius:8px;padding:8px 10px;border-top:3px solid var(--line)}
+.tally b{display:block;font-family:var(--display);font-size:28px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.tally span{font-size:12px;color:var(--muted);line-height:1.2;display:block}
+.tally .g{border-top-color:var(--good)} .tally .f{border-top-color:var(--bad)}
+.players{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pchip{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px}
+.pchip .av{width:28px;height:28px;border-radius:50%;background:var(--surface2) center/cover;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:13px;border:1px solid var(--line)}
+.pchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--muted)}
+.tag.ent{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.evo{width:100%;overflow-x:auto}
+.evo svg{width:100%;min-width:420px;height:auto;display:block}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:14px;z-index:5}
+@media (max-width:520px){#sharePanel{grid-template-columns:1fr!important;justify-items:start}}
+.login{position:fixed;inset:0;z-index:10;background:var(--bg);display:grid;place-items:center;padding:16px}
+#qrBox img,#qrBox canvas{width:100%!important;height:auto!important;display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login" hidden>
+  <form id="loginForm" class="panel" style="display:grid;gap:12px;width:min(360px,100%)">
+    <div><div class="eyebrow">Estadísticas de lanzamiento</div><h1 style="font-size:44px;font-weight:900;line-height:1">Mi Arco</h1></div>
+    <label style="display:grid;gap:4px;font-size:13px;color:var(--muted)">Usuario<input id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="ej. javi"></label>
+    <label style="display:grid;gap:4px;font-size:13px;color:var(--muted)">Contraseña<input id="lgPass" type="password" autocomplete="current-password"></label>
+    <button class="primary" type="submit" id="lgBtn">Entrar</button>
+    <p class="hint" id="lgMsg" style="margin:0">Pídele tu usuario y contraseña a quien administra el equipo.</p>
+  </form>
+</div>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Estadísticas de lanzamiento</div>
+      <h1>Mi Arco</h1>
+    </div>
+    <div class="row">
+      <span class="hint" id="whoami"></span>
+      <button id="shareBtn" class="ghost">Compartir</button>
+      <button id="logoutBtn" class="ghost">Salir</button>
+      <div class="count" id="countdown"><b class="num" id="days">–</b><span>días para el Nacional · 22 nov</span></div>
+    </div>
+  </header>
+  <section class="panel" id="sharePanel" hidden style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center">
+    <div id="qrBox" style="width:172px;height:172px;border-radius:8px;background:#fff;padding:6px" aria-label="Código QR de Mi Arco"></div>
+    <div style="display:grid;gap:8px;min-width:0">
+      <h2 style="font-size:22px">Abre Mi Arco en otro dispositivo</h2>
+      <p class="hint" style="margin:0">Escanea el código con la cámara del iPad o el celular. Cada jugador entra con el usuario y la contraseña que le diste. En iPhone o iPad: botón Compartir → «Agregar a pantalla de inicio» para tenerla como app.</p>
+      <div class="row"><input id="shareUrl" readonly value="" style="flex:1 1 220px"><button id="copyUrl">Copiar link</button><button class="ghost" id="closeShare">Cerrar</button></div>
+    </div>
+  </section>
+  <div class="notice" id="modeNotice" hidden></div>
+  <div class="notice" id="importBox" hidden style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+    <span>La base de datos está vacía. ¿Traer tu ficha, tu foto y tus partidos de la versión anterior?</span>
+    <button class="primary" id="importBtn">Importar mis datos</button>
+  </div>
+
+  <section class="panel" style="display:grid;gap:10px;padding:12px 16px" aria-label="Jugadores">
+    <div class="row" style="justify-content:space-between">
+      <div class="eyebrow">Jugador que estás viendo y registrando</div>
+    </div>
+    <div class="players" id="players"></div>
+    <form class="row" id="newMateForm" hidden>
+      <input id="nmMate" placeholder="Nombre del compañero" style="flex:1 1 200px">
+      <button class="primary" type="submit">Agregar</button>
+      <button class="ghost" type="button" id="mateCancel">Cancelar</button>
+    </form>
+  </section>
+
+  <section class="main">
+    <!-- Ficha del jugador -->
+    <article class="panel card" id="card">
+      <div class="photo" id="photo" role="button" tabindex="0" aria-label="Cambiar foto" style="cursor:pointer"><div class="ph">Toca aquí para subir tu foto</div></div>
+      <input type="file" id="quickFoto" accept="image/*" hidden>
+      <div>
+        <div class="pname" id="pName">Jugador</div>
+        <div class="pteam" id="pTeam"></div>
+      </div>
+      <dl class="dl" id="pData"></dl>
+      <div class="row"><button id="editBtn" class="ghost">Editar ficha</button></div>
+      <form class="form" id="profileForm" hidden>
+        <label class="full">Nombre<input id="fNombre" autocomplete="off"></label>
+        <label>Dorsal<input id="fNumero" inputmode="numeric"></label>
+        <label>Posición<select id="fPosicion">
+          <option value="">—</option><option>Extremo izquierdo</option><option>Lateral izquierdo</option><option>Central</option><option>Lateral derecho</option><option>Extremo derecho</option><option>Pivote</option><option>Portero</option>
+        </select></label>
+        <label>Altura (cm)<input id="fAltura" inputmode="numeric"></label>
+        <label>Peso (kg)<input id="fPeso" inputmode="decimal"></label>
+        <label>Mano hábil<select id="fMano"><option value="">—</option><option>Diestro</option><option>Zurdo</option></select></label>
+        <label>Edad<input id="fEdad" inputmode="numeric"></label>
+        <label class="full">Equipo<input id="fEquipo" autocomplete="off"></label>
+        <label class="full">Foto<input id="fFoto" type="file" accept="image/*"></label>
+        <div class="row full"><button type="submit" class="primary">Guardar ficha</button><button type="button" id="cancelEdit" class="ghost">Cancelar</button><button type="button" id="delMate" class="ghost" hidden>Eliminar compañero</button></div>
+      </form>
+    </article>
+
+    <!-- Arco -->
+    <article class="panel">
+      <div class="goalhead">
+        <div>
+          <div class="eyebrow">Vista del lanzador · arco 3 × 2 m</div>
+          <h2 style="font-size:22px" id="goalTitle">Dónde lanzas</h2>
+        </div>
+        <div class="seg" role="group" aria-label="Datos a mostrar">
+          <button id="vMatch" aria-pressed="true">Esta sesión</button>
+          <button id="vAll" aria-pressed="false">Partidos</button>
+          <button id="vTrain" aria-pressed="false">Entrenamientos</button>
+        </div>
+      </div>
+      <div class="goalwrap"><svg class="goal" id="goal" viewBox="0 0 360 250" role="img" aria-label="Arco de handball dividido en 9 zonas"></svg></div>
+      <div class="legend">
+        <span><i style="background:var(--good)"></i>60 % o más</span>
+        <span><i style="background:var(--warn)"></i>35–59 %</span>
+        <span><i style="background:var(--bad)"></i>menos de 35 %</span>
+        <span>Tamaño del círculo = lanzamientos a esa zona</span>
+      </div>
+      <div class="tally" id="tally"></div>
+      <p class="hint" id="tallyNote" style="margin:6px 0 0"></p>
+    </article>
+  </section>
+
+  <!-- Barra de registro -->
+  <section class="panel entry" aria-label="Registrar lanzamientos">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="font-size:22px" id="entryTitle">Registrar sesión</h2>
+      <div class="row">
+        <select id="matchSel" aria-label="Sesión" style="width:auto;max-width:100%"></select>
+        <button id="newMatchBtn">Nueva sesión</button>
+      </div>
+    </div>
+    <form class="row" id="newMatchForm" hidden>
+      <div class="seg" role="group" aria-label="Tipo de sesión">
+        <button type="button" id="tPartido" aria-pressed="true">Partido</button>
+        <button type="button" id="tEntreno" aria-pressed="false">Entrenamiento</button>
+      </div>
+      <input id="nmNombre" placeholder="Nombre (ej. vs U. de Chile · Nacional F1)" style="flex:2 1 240px">
+      <input id="nmFecha" type="date" style="flex:1 1 140px">
+      <button class="primary" type="submit">Crear</button>
+      <button class="ghost" type="button" id="nmCancel">Cancelar</button>
+    </form>
+    <div class="grid">
+      <div><div class="eyebrow" style="margin-bottom:6px">Situación</div><div class="chips" id="sitChips"></div></div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Desde dónde lanzas</div><div class="chips" id="posChips"></div></div>
+    </div>
+    <div>
+      <p class="hint" id="zoneHint">Toca una zona del arco y marca el resultado. «Fuera / poste» no necesita zona.</p>
+      <div class="res">
+        <button class="gol" id="bGol">GOL</button>
+        <button class="ata" id="bAta">ATAJADA</button>
+        <button class="fue" id="bFue">FUERA / POSTE</button>
+      </div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span class="hint" id="lastShot"></span>
+      <button class="ghost" id="undoBtn">Deshacer último</button>
+    </div>
+  </section>
+
+  <!-- Estadísticas -->
+  <section class="panel" style="display:grid;gap:16px">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="font-size:22px" id="statsTitle">Resumen</h2>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="two">
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">Tú vs referencia profesional</div>
+        <div class="bars" id="proBars"></div>
+        <p class="hint" style="margin-top:10px">Línea vertical = efectividad real de todo el EHF EURO 2024 masculino por tipo de lanzamiento (6.099 tiros, informe oficial EHF). Total del torneo: 62 %; en el EURO 2026 subió a 65 %.</p>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">Palo y altura</div>
+        <div class="bars" id="sideBars"></div>
+      </div>
+    </div>
+    <div>
+      <div class="row" style="justify-content:space-between;margin-bottom:6px">
+        <div class="eyebrow" id="evoTitle">Evolución por sesión</div>
+        <span class="hint" id="evoDelta"></span>
+      </div>
+      <div class="evo" id="evo"></div>
+    </div>
+  </section>
+
+  <section class="panel" style="display:grid;gap:14px" aria-label="Referente de tu posición">
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <div class="eyebrow" id="refEyebrow">Referente de tu posición</div>
+        <h2 style="font-size:22px">Compárate con un jugador top</h2>
+      </div>
+      <div class="row">
+        <select id="refGroup" aria-label="Posición" style="width:auto"></select>
+        <select id="refSel" aria-label="Jugador de referencia" style="width:auto;max-width:100%"></select>
+      </div>
+    </div>
+    <div id="refCard"></div>
+  </section>
+
+  <section class="panel" style="display:grid;gap:12px">
+    <h2 style="font-size:22px">Recomendaciones</h2>
+    <ul class="tips" id="tips"></ul>
+    <div id="coachBox" hidden style="display:grid;gap:8px">
+      <div class="row"><button class="primary" id="coachBtn">Solicitar recomendación</button><span class="hint">Usa tus datos para un plan de mejora antes del Nacional.</span></div>
+      <div class="coach" id="coachOut" hidden></div>
+    </div>
+  </section>
+
+  <section class="panel" style="display:grid;gap:10px">
+    <h2 style="font-size:22px">Sesiones</h2>
+    <div class="matches" id="matchList"></div>
+  </section>
+
+  <footer class="hint" style="display:grid;gap:4px">
+    <div class="eyebrow">Fuentes de la base profesional</div>
+    <div id="sources"></div>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const NACIONAL = new Date('2026-11-22T00:00:00-03:00');
+const ZROW=['Arriba','Media altura','Abajo'], ZCOL=['izquierda','centro','derecha'];
+const zoneName=z=>z<0?'Fuera':`${ZROW[Math.floor(z/3)]} ${ZCOL[z%3]}`;
+const SITS=[['pos','Ataque posicional'],['bt','Penetración 1 vs 1'],['ca','Contraataque'],['7m','7 metros']];
+const POSS=[['ei','Extremo izq.'],['li','Lateral izq.'],['c','Central'],['ld','Lateral der.'],['ed','Extremo der.'],['pv','Pivote']];
+const RES={gol:'Gol',ata:'Atajada',fue:'Fuera / poste'};
+/* Base de referencia oficial: EHF EURO 2024 masculino, 6.099 lanzamientos (informe cualitativo EHF) */
+const PRO={ca:{v:84,g:393,i:470,l:'Contraataque'},'7m':{v:75,g:358,i:480,l:'7 metros'},bt:{v:73,g:489,i:668,l:'Penetración 1 vs 1'},piv:{v:68,g:1084,i:1584,l:'6 m / pivote'},ext:{v:61,g:464,i:757,l:'Extremo'},nueve:{v:43,g:843,i:1961,l:'9 m (lanzamiento lejano)'}};
+const SRC={
+  euro24:{t:'EHF EURO 2024 · análisis cualitativo (EHF)',u:'https://activities.eurohandball.com/media/2fqf50oi/m_ehfeuro-_2024_qualitative-analysis.pdf'},
+  euro26:{t:'EHF EURO 2026 · análisis (EHF)',u:'https://ehfel.eurohandball.com/media/whdinkbz/mens_ehf_euro_26_analysis.pdf'},
+  wc25:{t:'Mundial IHF 2025 · estadísticas de Dinamarca (IHF)',u:'https://www.ihf.info/sites/default/files/competitions/7c2253d6-1efd-4495-b237-6171c39fac97/pdf/DENTOTAL.PDF'}
+};
+/* Jugadores top por posición. tipos = [goles, lanzamientos] por tipo de tiro, solo cuando la fuente lo detalla */
+const GROUPS={ext:'Extremos',piv:'Pivotes',lat:'Laterales',cen:'Centrales'};
+const REFS={
+ ext:[
+  {n:'Emil Jakobsen',pais:'Dinamarca',pos:'Extremo izquierdo',club:'SG Flensburg-Handewitt',fis:'192 cm · 86 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[45,61],tipos:{ext:[17,26],'7m':[17,21],ca:[10,13],piv:[1,1]},
+   claves:['Solo 17 de sus 45 goles salieron desde la banda: el resto vino de penales (17) y contraataques (10). Un extremo top multiplica sus goles corriendo y asumiendo los 7 m.','Desde la banda anotó 65 % (17/26). El promedio del EURO 2024 desde el extremo fue 61 %: si tú superas 55 % desde la banda estás bien encaminado.','Fue el lanzador de penales de la selección campeona del mundo (81 %, 17/21). Si eres extremo, pide practicar 7 m: es la vía más directa para sumar goles.']},
+  {n:'Johan Hansen',pais:'Dinamarca',pos:'Extremo derecho',club:'SG Flensburg-Handewitt',fis:'190 cm · 90 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[14,20],tipos:{ext:[11,16],'7m':[0,1],ca:[3,3]},
+   claves:['La mayoría de sus goles (11 de 14) fueron desde la banda, con 69 %.','Perfecto en contraataque (3/3): cuando corre, define.']},
+  {n:'Bence Imre',pais:'Hungría',pos:'Extremo derecho',fis:'',src:'euro26',torneo:'EHF EURO 2026',tot:[46,57],tipos:null,
+   claves:['81 % de efectividad con 57 lanzamientos: volumen alto sin perder precisión.']},
+  {n:'August Pedersen',pais:'',pos:'Extremo izquierdo',fis:'',src:'euro26',torneo:'EHF EURO 2026',tot:[49,62],tipos:null,
+   claves:['79 % con 62 tiros: uno de los máximos goleadores del torneo jugando de extremo.']}
+ ],
+ piv:[
+  {n:'Ludovic Fabregas',pais:'Francia',pos:'Pivote',fis:'',src:'euro24',torneo:'EHF EURO 2024 (campeón)',tot:[44,50],tipos:null,
+   claves:['88 % (44/50). Los pivotes top superan el 80 % porque casi solo lanzan cuando ya ganaron la posición al defensor.','El informe EHF destaca el empuje con el hombro para ganar el espacio antes de recibir.']},
+  {n:'Johannes Golla',pais:'Alemania',pos:'Pivote',fis:'',src:'euro26',torneo:'EHF EURO 2026',tot:[32,39],tipos:null,
+   claves:['82 % (32/39): selección de tiro muy estricta.']},
+  {n:'Lukas Jørgensen',pais:'Dinamarca',pos:'Pivote',club:'SG Flensburg-Handewitt',fis:'193 cm · 108 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[21,28],tipos:{piv:[8,12],ca:[10,12],bt:[0,1]},
+   claves:['Casi la mitad de sus goles fueron en contraataque (10/12): un pivote moderno también corre.']},
+  {n:'Magnus Saugstrup',pais:'Dinamarca',pos:'Pivote',club:'SC Magdeburg',fis:'197 cm · 101 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[8,12],tipos:{piv:[6,8],ca:[2,4]},
+   claves:['Pocos tiros pero 75 % desde 6 m: su valor está también en bloquear y abrir espacios.']}
+ ],
+ lat:[
+  {n:'Mathias Gidsel',pais:'Dinamarca',pos:'Lateral derecho',club:'Füchse Berlin',fis:'190 cm · 86 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[74,107],tipos:{nueve:[7,19],bt:[44,59],ca:[15,18],piv:[3,3],ext:[1,1],'7m':[1,1]},
+   claves:['Desde 9 m anotó solo 37 % (7/19), pero 75 % en penetración (44/59) y 83 % en contraataque. El mejor anotador del mundo gana el 1 vs 1, no tira de lejos.','En el EHF EURO 2026 batió el récord de goles en un torneo: 68 de 95 (72 %).']},
+  {n:'Simon Pytlick',pais:'Dinamarca',pos:'Lateral izquierdo',club:'SG Flensburg-Handewitt',fis:'191 cm · 91 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[50,67],tipos:{nueve:[20,32],bt:[26,30],ca:[4,5]},
+   claves:['Combina las dos amenazas: 63 % desde 9 m (20/32) y 87 % en penetración (26/30). Así el defensor no sabe si salir o esperar.']},
+  {n:'Francisco Costa',pais:'Portugal',pos:'Lateral derecho',fis:'',src:'euro26',torneo:'EHF EURO 2026',tot:[61,94],tipos:null,
+   claves:['65 % con 94 tiros y uno de los lanzamientos más rápidos del torneo (132 km/h).']}
+ ],
+ cen:[
+  {n:'Rasmus Lauge',pais:'Dinamarca',pos:'Central',club:'Bjerringbro-Silkeborg',fis:'193 cm · 96 kg',src:'wc25',torneo:'Mundial IHF 2025 (campeón)',tot:[28,37],tipos:{nueve:[13,19],bt:[14,16],ca:[1,2]},
+   claves:['68 % desde 9 m y 88 % en penetración: elige bien cuándo tirar y cuándo dirigir.']},
+  {n:'Óli Mittun',pais:'Islas Feroe',pos:'Central',fis:'',src:'euro26',torneo:'EHF EURO 2026',tot:[23,26],tipos:null,
+   claves:['88 % (23/26): pocos tiros, casi todos buenos. La selección de tiro también es una habilidad.']}
+ ]
+};
+const TIPS={
+ ca:'En contraataque el error típico es apurar el tiro. Llega controlado, fija al portero mirando a un lado y lanza bajo al palo contrario; si el portero sale adelantado, usa la vaselina. Ejercicio: 10 contraataques 1 vs portero por sesión, alternando palo largo bajo y vaselina.',
+ '7m':'Arma una rutina fija (respiración, bote, mirada) y elige dos zonas preferidas. Observa la pierna del portero: si se adelanta, lanza bajo; si se queda atrás, arriba. Ejercicio: series de 10 penales con castigo por cada fallo para sumar presión.',
+ ext:'Desde el extremo el ángulo es cerrado: ábrelo saltando hacia el centro del área y retrasa el tiro en el aire. Alterna palo largo bajo con primer palo arriba para que el portero no se cierre. Ejercicio: 3 series de 8 tiros con un objetivo marcado en cada esquina.',
+ piv:'En pivote, gira sobre el defensor y lanza sin bote extra. A corta distancia, los tiros bajos y a la cadera del portero son los que más le cuestan. Ejercicio: recepción de espaldas + giro + tiro, 3 × 10.',
+ bt:'En penetración, ataca el hombro del defensor y cambia de ritmo antes de entrar; lanza apenas pases la línea, sin esperar a que cierre la ayuda. Ejercicio: 1 vs 1 desde 9 m con defensor activo, 3 × 8, terminando con tiro o pase al pivote.',
+ nueve:'Desde 9 m el portero tiene más tiempo: lanza antes de que se arme el bloqueo, usa el bote bajo y aprovecha la pantalla de un compañero. Varía el armado (alto, cadera, lateral). Ejercicio: 3 × 10 tiros tras 3 pasos apuntando a las esquinas bajas.'
+};
+
+const state={profile:{nombre:'Javier Fuentes'},mates:[],playerId:'yo',matches:[],currentId:null,view:'match',zone:null,sit:'pos',pos:'li',editing:false,newTipo:'partido'};
+const player=()=>state.playerId==='yo'?(state.profile||{}):(state.mates.find(m=>m.id===state.playerId)||{});
+const isEnt=m=>m&&m.tipo==='entreno';
+const sessDate=m=>m.fecha?m.fecha.split('-').reverse().slice(0,2).join('/'):'';
+const mine=shots=>(shots||[]).filter(s=>(s.j||'yo')===state.playerId);
+let db=null, sample=null, writable=true, local=true;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct=(g,i)=>i?Math.round(g/i*100):null;
+const colorFor=p=>p==null?'var(--muted)':p>=60?'var(--good)':p>=35?'var(--warn)':'var(--bad)';
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2200)}
+const cur=()=>state.matches.find(m=>m.id===state.currentId)||null;
+
+/* ---------- Cálculo ---------- */
+function cat(s){if(s.s==='ca')return'ca';if(s.s==='7m')return'7m';if(s.s==='bt')return'bt';if(s.p==='ei'||s.p==='ed')return'ext';if(s.p==='pv')return'piv';return'nueve'}
+function palo(s){if(s.z<0||s.s==='7m')return null;const col=s.z%3;const side=(s.p==='ei'||s.p==='li')?'L':(s.p==='ed'||s.p==='ld')?'R':null;if(!side||col===1)return null;return ((side==='L'&&col===0)||(side==='R'&&col===2))?'primer':'segundo'}
+function compute(shots){
+  const o={n:shots.length,g:0,fue:0,zones:Array.from({length:9},()=>({i:0,g:0})),cat:{},palo:{primer:{i:0,g:0},segundo:{i:0,g:0}},alt:[{i:0,g:0},{i:0,g:0},{i:0,g:0}],sit:{}};
+  for(const k in PRO)o.cat[k]={i:0,g:0};
+  for(const k of SITS)o.sit[k[0]]={i:0,g:0};
+  for(const s of shots){const gol=s.r==='gol';if(gol)o.g++;if(s.r==='fue')o.fue++;
+    const c=o.cat[cat(s)];c.i++;if(gol)c.g++;
+    const st=o.sit[s.s];if(st){st.i++;if(gol)st.g++}
+    if(s.z>=0){const z=o.zones[s.z];z.i++;if(gol)z.g++;const a=o.alt[Math.floor(s.z/3)];a.i++;if(gol)a.g++;
+      const p=palo(s);if(p){o.palo[p].i++;if(gol)o.palo[p].g++}}}
+  return o;
+}
+function sessionsInView(){if(state.view==='all')return state.matches.filter(m=>!isEnt(m));if(state.view==='train')return state.matches.filter(isEnt);const m=cur();return m?[m]:[]}
+function shotsInView(){return sessionsInView().flatMap(m=>mine(m.shots))}
+function evoPoints(){
+  const list=state.view==='match'?state.matches:sessionsInView();
+  return list.map(m=>{const c=compute(mine(m.shots));return {m,n:c.n,g:c.g,p:pct(c.g,c.n)}}).filter(x=>x.n>0)
+    .sort((a,b)=>(a.m.fecha||'').localeCompare(b.m.fecha||'')||(a.m.creado||0)-(b.m.creado||0));
+}
+
+/* ---------- Recomendaciones ---------- */
+function recommend(o){
+  const t=[];const onT=o.zones.reduce((a,z)=>a+z.i,0);
+  if(o.n<5){t.push({n:'mejora',h:'Faltan datos',p:`Llevas ${o.n} lanzamiento${o.n===1?'':'s'}. Con 5 o más empiezan las recomendaciones por zona; con 20 o más ya son confiables.`});}
+  const ca=o.sit.ca;
+  if(ca.i){const p=pct(ca.g,ca.i);t.push({n:p>=PRO.ca.v?'ok':p>=60?'mejora':'alerta',h:`Contraataques: ${ca.g} goles de ${ca.i} (${p} %)`,p:p>=PRO.ca.v?`Estás al nivel del EHF EURO 2024 (${PRO.ca.v} %). Mantén la calma al definir.`:`En el EHF EURO 2024 los contraataques entraron el ${PRO.ca.v} % de las veces. Te faltan ${ca.i-ca.g} goles fáciles. ${TIPS.ca}`});}
+  const zs=o.zones.map((z,i)=>({...z,z:i,p:pct(z.g,z.i)})).filter(z=>z.i>=3);
+  if(zs.length){
+    const best=[...zs].sort((a,b)=>b.p-a.p||b.i-a.i)[0];
+    t.push({n:'ok',h:`Tu zona más fuerte: ${zoneName(best.z)} (${best.g}/${best.i}, ${best.p} %)`,p:'Guárdala para los momentos decisivos del partido. Si el portero empieza a cerrarla, finta hacia ella y lanza a la zona opuesta en altura.'});
+    const worst=[...zs].sort((a,b)=>a.p-b.p)[0];
+    if(worst.z!==best.z&&worst.p<35)t.push({n:'alerta',h:`Zona débil: ${zoneName(worst.z)} (${worst.g}/${worst.i}, ${worst.p} %)`,p:'El portero te está leyendo ese tiro. Cambia el armado de brazo o la altura de salida, o usa esa zona solo después de una finta.'});
+  }
+  if(onT>=6){const mx=o.zones.reduce((a,z,i)=>z.i>a.i?{i:z.i,z:i}:a,{i:0,z:0});if(mx.i/onT>0.4)t.push({n:'mejora',h:`Eres predecible: ${Math.round(mx.i/onT*100)} % de tus tiros van a ${zoneName(mx.z).toLowerCase()}`,p:'Los porteros de buen nivel detectan patrones en 2 o 3 lanzamientos. Reparte tus tiros entre al menos 3 zonas distintas por partido.'});}
+  const hi=o.alt[0],lo=o.alt[2];
+  if(hi.i>=3&&lo.i>=3){const ph=pct(hi.g,hi.i),pl=pct(lo.g,lo.i);
+    if(pl-ph>=15)t.push({n:'mejora',h:`Rindes más abajo (${pl} %) que arriba (${ph} %)`,p:'Los porteros cubren bien lo alto con los brazos; los tiros bajos y a ras de suelo les exigen bajar el cuerpo. Prioriza esquinas bajas.'});
+    else if(ph-pl>=15)t.push({n:'mejora',h:`Rindes más arriba (${ph} %) que abajo (${pl} %)`,p:'Tu tiro bajo pierde potencia o precisión. Practica el tiro con bote y el lanzamiento a la cadera para tener una amenaza baja.'});}
+  else if(onT>=6&&hi.i/onT>0.6)t.push({n:'mejora',h:'Casi todos tus tiros van arriba',p:'Un portero que sabe que vas arriba solo levanta los brazos. Agrega tiros bajos para obligarlo a dudar.'});
+  const p1=o.palo.primer,p2=o.palo.segundo;
+  if(p1.i>=3&&p2.i>=3){const a=pct(p1.g,p1.i),b=pct(p2.g,p2.i);
+    t.push({n:Math.abs(a-b)<10?'ok':'mejora',h:`Primer palo ${a} % · Segundo palo ${b} %`,p:a>b?'Te sale mejor el primer palo. El portero suele cerrarlo primero, así que úsalo cuando lo veas adelantado hacia el centro.':b>a?'Te sale mejor el segundo palo (palo largo). Es el tiro clásico desde los costados; complétalo con algún primer palo arriba para que no se cargue al lado largo.':'Estás equilibrado entre ambos palos, eso te hace difícil de leer.'});}
+  for(const k of ['7m','bt','ext','piv','nueve']){const c=o.cat[k];if(c.i<3)continue;const p=pct(c.g,c.i);
+    if(p<PRO[k].v-10)t.push({n:'alerta',h:`${PRO[k].l}: ${p} % (referencia pro ~${PRO[k].v} %)`,p:TIPS[k]});
+    else if(p>=PRO[k].v)t.push({n:'ok',h:`${PRO[k].l}: ${p} %, al nivel de referencia`,p:'Sigue así. Este tipo de lanzamiento puede ser tu arma principal en el Nacional.'});}
+  if(o.n>=5&&o.fue/o.n>0.2)t.push({n:'alerta',h:`${Math.round(o.fue/o.n*100)} % de tus tiros van fuera o al poste`,p:'Antes de buscar potencia, asegura el arco. Ejercicio: 20 tiros por sesión a conos en las esquinas, sumando solo los que entran.'});
+  return t;
+}
+
+/* ---------- Render ---------- */
+function renderCountdown(){const d=Math.ceil((NACIONAL-new Date())/864e5);$('days').textContent=d>0?d:'0';if(d<=0)$('countdown').querySelector('span').textContent='¡Es hoy o ya pasó!'}
+function renderPlayers(){
+  const all=[{id:'yo',...(state.profile||{})},...state.mates];
+  const ini=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  $('players').innerHTML=all.map(p=>`<button class="pchip" data-pl="${esc(p.id)}" aria-pressed="${p.id===state.playerId}"><span class="av" style="${p.foto?`background-image:url('${p.foto}')`:''}">${p.foto?'':esc(ini(p.nombre))}</span>${esc(p.nombre||'Sin nombre')}${p.id==='yo'?' (yo)':''}</button>`).join('')+(writable?`<button class="pchip ghost" id="addMate" style="padding-left:12px">+ Agregar compañero</button>`:'');
+}
+function renderProfile(){
+  const p=player();
+  $('delMate').hidden=state.playerId==='yo';$('delMate').textContent=state.confirmMate?'Sí, eliminar compañero':'Eliminar compañero';
+  $('pName').textContent=p.nombre||'Jugador';
+  $('pTeam').textContent=[p.posicion,p.equipo].filter(Boolean).join(' · ')||'Agrega tu posición y equipo';
+  const ph=$('photo');
+  ph.innerHTML=(p.foto?`<img alt="Foto de ${esc(p.nombre)}" src="${p.foto}">`:`<div class="ph">${writable?'Toca aquí para subir una foto':'Sin foto'}</div>`)+(p.numero?`<div class="dorsal num">${esc(p.numero)}</div>`:'');
+  const items=[['Altura',p.altura?p.altura+' cm':'—'],['Peso',p.peso?p.peso+' kg':'—'],['Mano',p.mano||'—'],['Edad',p.edad?p.edad+' años':'—']];
+  $('pData').innerHTML=items.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('');
+  $('editBtn').hidden=!writable||state.editing; $('profileForm').hidden=!state.editing;
+}
+function renderGoal(o){
+  const W=300,H=200,X=30,Y=24,post=8,zw=W/3,zh=H/3;
+  let s=`<defs><pattern id="net" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 0L12 12M12 0L0 12" stroke="var(--net)" stroke-width=".8" fill="none"/></pattern></defs>`;
+  s+=`<rect x="${X}" y="${Y}" width="${W}" height="${H}" fill="url(#net)"/>`;
+  // franjas de 20 cm, como en un arco real
+  const stripes=(x,y,w,h,vertical)=>{let r='';const len=vertical?h:w;for(let i=0;i<len;i+=20){const c=(i/20)%2?'var(--post2)':'var(--post)';r+=vertical?`<rect x="${x}" y="${y+i}" width="${w}" height="${Math.min(20,len-i)}" fill="${c}"/>`:`<rect x="${x+i}" y="${y}" width="${Math.min(20,len-i)}" height="${h}" fill="${c}"/>`}return r+`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="var(--ink)" stroke-width=".6"/>`};
+  for(let r=1;r<3;r++)s+=`<line x1="${X}" x2="${X+W}" y1="${Y+r*zh}" y2="${Y+r*zh}" stroke="var(--muted)" stroke-dasharray="3 4" stroke-width="1"/>`;
+  for(let c=1;c<3;c++)s+=`<line y1="${Y}" y2="${Y+H}" x1="${X+c*zw}" x2="${X+c*zw}" stroke="var(--muted)" stroke-dasharray="3 4" stroke-width="1"/>`;
+  const maxI=Math.max(1,...o.zones.map(z=>z.i));
+  for(let z=0;z<9;z++){const cx=X+(z%3)*zw+zw/2,cy=Y+Math.floor(z/3)*zh+zh/2,d=o.zones[z],p=pct(d.g,d.i);
+    s+=`<g class="zone${state.zone===z?' sel':''}" data-z="${z}" tabindex="0" role="button" aria-label="${zoneName(z)}${d.i?`, ${d.g} de ${d.i}`:''}"><rect class="hit" x="${X+(z%3)*zw+1}" y="${Y+Math.floor(z/3)*zh+1}" width="${zw-2}" height="${zh-2}" rx="3"/>`;
+    if(d.i){const r=12+18*Math.sqrt(d.i/maxI);s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${colorFor(p)}" fill-opacity=".9" stroke="var(--surface)" stroke-width="2"/><text x="${cx}" y="${cy-1}" text-anchor="middle" font-family="Big Shoulders Display,Arial Narrow,sans-serif" font-weight="800" font-size="${r>20?17:13}" fill="#fff">${p}%</text><text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fff">${d.g}/${d.i}</text>`}
+    else s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="none" stroke="var(--muted)" stroke-width="1"/>`;
+    s+='</g>'}
+  s+=stripes(X-post,Y-post,W+post*2,post,false)+stripes(X-post,Y,post,H,true)+stripes(X+W,Y,post,H,true);
+  s+=`<line x1="4" x2="356" y1="${Y+H}" y2="${Y+H}" stroke="var(--ink)" stroke-width="2"/>`;
+  s+=`<text x="${X}" y="${Y+H+18}" font-size="10" fill="var(--muted)">Palo izquierdo</text><text x="${X+W}" y="${Y+H+18}" font-size="10" fill="var(--muted)" text-anchor="end">Palo derecho</text><text x="${X+W/2}" y="${Y+H+18}" font-size="10" fill="var(--muted)" text-anchor="middle">3 m</text>`;
+  $('goal').innerHTML=s;
+}
+function chips(el,list,val,key){el.innerHTML=list.map(([k,l])=>`<button class="chip" data-${key}="${k}" aria-pressed="${k===val}">${l}</button>`).join('')}
+function renderEntry(){
+  const sel=$('matchSel');
+  sel.innerHTML=state.matches.length?state.matches.map(m=>`<option value="${esc(m.id)}"${m.id===state.currentId?' selected':''}>${isEnt(m)?'Entreno':'Partido'} · ${esc(m.nombre)}</option>`).join(''):'<option value="">Crea tu primera sesión</option>';
+  $('entryTitle').textContent=`Registrar · ${player().nombre||'jugador'}`;
+  $('tPartido').setAttribute('aria-pressed',state.newTipo==='partido');$('tEntreno').setAttribute('aria-pressed',state.newTipo==='entreno');
+  chips($('sitChips'),SITS,state.sit,'sit');chips($('posChips'),POSS,state.pos,'pos');
+  const m=cur(), can=writable&&!!m;
+  ['bGol','bAta'].forEach(id=>$(id).disabled=!can||state.zone==null);$('bFue').disabled=!can;
+  $('undoBtn').disabled=!can||!mine(m.shots).length;$('newMatchBtn').disabled=!writable;
+  $('zoneHint').innerHTML=!m?'Crea una sesión (partido o entrenamiento) para empezar a registrar.':state.zone==null?'Toca una zona del arco y marca el resultado. «Fuera / poste» no necesita zona.':`Zona elegida: <span class="zonelabel">${zoneName(state.zone)}</span>. ¿Cómo terminó?`;
+  const last=m&&mine(m.shots).slice(-1)[0];
+  $('lastShot').textContent=last?`Último: ${RES[last.r]} · ${zoneName(last.z)} · ${SITS.find(x=>x[0]===last.s)[1]}`:'';
+}
+function bar(label,g,i,pro){const p=pct(g,i);return `<div class="bar"><div class="lab"><span>${label}</span><span class="num">${i?`${g}/${i} · <b>${p} %</b>`:'<span class="none">sin datos</span>'}</span></div><div class="track">${i?`<div class="fill" style="width:${p}%;background:${colorFor(p)}"></div>`:''}${pro!=null?`<div class="pro" style="left:${pro}%" title="Referencia pro ${pro} %"></div>`:''}</div></div>`}
+function renderStats(o){
+  const m=cur(),who=player().nombre||'Jugador';
+  const nP=state.matches.filter(x=>!isEnt(x)).length,nE=state.matches.filter(isEnt).length;
+  $('statsTitle').textContent=`${who} · `+(state.view==='all'?`todos los partidos (${nP})`:state.view==='train'?`todos los entrenamientos (${nE})`:(m?m.nombre:'sin sesión'));
+  $('goalTitle').textContent=state.view==='all'?'Dónde lanzas · partidos':state.view==='train'?'Dónde lanzas · entrenamientos':'Dónde lanzas · esta sesión';
+  const ca=o.sit.ca;
+  $('kpis').innerHTML=[[o.n,'Lanzamientos'],[o.g,'Goles'],[o.n?pct(o.g,o.n)+' %':'—','Efectividad'],[ca.i?`${ca.g}/${ca.i}`:'—','Contraataques (gol/total)']].map(([v,l])=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('');
+  $('proBars').innerHTML=Object.keys(PRO).map(k=>bar(PRO[k].l,o.cat[k].g,o.cat[k].i,PRO[k].v)).join('');
+  $('sideBars').innerHTML=bar('Primer palo',o.palo.primer.g,o.palo.primer.i)+bar('Segundo palo',o.palo.segundo.g,o.palo.segundo.i)+bar('Arriba',o.alt[0].g,o.alt[0].i)+bar('Media altura',o.alt[1].g,o.alt[1].i)+bar('Abajo',o.alt[2].g,o.alt[2].i)+`<p class="hint">Primer palo = el más cercano a tu posición (solo cuenta tiros desde laterales y extremos).</p>`;
+  const tips=recommend(o);
+  const ev=renderEvo();if(ev)tips.unshift(ev);
+  const rc=refCompare(o)[0];if(rc)tips.push(rc);
+  $('tips').innerHTML=tips.map(t=>`<li class="tip ${t.n}"><h3>${esc(t.h)}</h3><p>${esc(t.p)}</p></li>`).join('')||'<li class="tip"><p>Registra lanzamientos para ver recomendaciones.</p></li>';
+  $('matchList').innerHTML=state.matches.length?state.matches.map(m=>{const c=compute(mine(m.shots));return `<div class="match"><div style="min-width:0"><div class="mn"><span class="tag${isEnt(m)?' ent':''}">${isEnt(m)?'Entreno':'Partido'}</span> ${esc(m.nombre)}</div><div class="ms num">${esc(m.fecha||'')} · ${esc(who)}: ${c.g}/${c.n} goles${c.n?` · ${pct(c.g,c.n)} %`:''}</div></div>${writable?`<button class="ghost" data-del="${esc(m.id)}">${state.confirmDel===m.id?'Sí, eliminar':'Eliminar'}</button>`:''}</div>`}).join(''):'<p class="hint">Aún no hay partidos. Crea uno en la barra de registro.</p>';
+}
+function renderEvo(){
+  const pts=evoPoints(),kind=state.view==='train'?'entrenamientos':state.view==='all'?'partidos':'sesiones';
+  $('evoTitle').textContent=`Evolución · ${kind} de ${player().nombre||'jugador'}`;
+  if(pts.length<2){$('evo').innerHTML=`<p class="hint">Necesitas al menos 2 ${kind} con lanzamientos registrados para ver la evolución.</p>`;$('evoDelta').textContent='';return null}
+  const W=640,H=200,L=36,R=16,T=18,B=34,iw=W-L-R,ih=H-T-B,step=pts.length>1?iw/(pts.length-1):0;
+  const x=i=>L+i*step,y=p=>T+ih-(p/100)*ih,maxN=Math.max(...pts.map(q=>q.n));
+  let s='';
+  for(const g of [0,25,50,75,100])s+=`<line x1="${L}" x2="${W-R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(g)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${g}%</text>`;
+  const bw=Math.min(22,step*0.5||22);
+  pts.forEach((q,i)=>{const h=(q.n/maxN)*ih*0.45;s+=`<rect x="${x(i)-bw/2}" y="${T+ih-h}" width="${bw}" height="${h}" fill="var(--net)" opacity=".7"><title>${q.n} lanzamientos</title></rect>`});
+  const path=pts.map((q,i)=>`${i?'L':'M'}${x(i)},${y(q.p)}`).join('');
+  s+=`<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const every=Math.ceil(pts.length/10);
+  pts.forEach((q,i)=>{const last=i===pts.length-1;s+=`<circle cx="${x(i)}" cy="${y(q.p)}" r="${last?6:4}" fill="${last?'var(--accent)':'var(--surface)'}" stroke="var(--accent)" stroke-width="2"><title>${esc(q.m.nombre)}: ${q.g}/${q.n} (${q.p} %)</title></circle>`;
+    if(last||i%every===0){s+=`<text x="${x(i)}" y="${y(q.p)-10}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${q.p}%</text><text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="10" fill="var(--muted)">${esc(sessDate(q.m)||('#'+(i+1)))}</text>`}});
+  $('evo').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Efectividad por sesión">${s}</svg><p class="hint">Línea = efectividad de cada sesión. Barras grises = cantidad de lanzamientos.</p>`;
+  const half=Math.min(3,Math.floor(pts.length/2)),avg=a=>{const g=a.reduce((s,q)=>s+q.g,0),n=a.reduce((s,q)=>s+q.n,0);return pct(g,n)};
+  const a=avg(pts.slice(0,half)),b=avg(pts.slice(-half)),d=b-a;
+  $('evoDelta').textContent=`Últimas ${half} vs primeras ${half}: ${d>0?'+':''}${d} pts`;
+  if(pts.length<4)return null;
+  return {n:d>=5?'ok':d<=-5?'alerta':'mejora',h:d>=5?`Vas mejorando: +${d} puntos de efectividad`:d<=-5?`Bajaste ${-d} puntos en tus últimas ${kind}`:`Tu efectividad está estable (${d>0?'+':''}${d} pts)`,
+    p:d>=5?`Comparando tus últimas ${half} ${kind} con las primeras ${half}, pasaste de ${a} % a ${b} %. Mantén los ejercicios que estás haciendo.`:d<=-5?`Pasaste de ${a} % a ${b} %. Revisa si cambiaste de zona preferida o si estás lanzando más desde lejos; también puede ser cansancio acumulado.`:`Para dar el salto, enfoca los próximos ${kind} en tu zona o tipo de lanzamiento más débil.`};
+}
+function posGroup(){
+  const p=(player().posicion||'').toLowerCase();
+  if(p.startsWith('extremo'))return'ext';if(p==='pivote')return'piv';if(p.startsWith('lateral'))return'lat';if(p==='central')return'cen';
+  const cnt={};for(const s of state.matches.flatMap(m=>mine(m.shots)))cnt[s.p]=(cnt[s.p]||0)+1;
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];const map={ei:'ext',ed:'ext',li:'lat',ld:'lat',c:'cen',pv:'piv'};
+  return top?map[top[0]]:'ext';
+}
+function currentRef(){const g=state.refGroup||posGroup();const list=REFS[g];return {g,r:list[Math.min(state.refIdx||0,list.length-1)]}}
+function refCompare(o){
+  const {r}=currentRef(),out=[];if(!r.tipos)return out;
+  const hisG=r.tot[0],myG=o.g;
+  for(const k in r.tipos){const [hg,hi]=r.tipos[k];const c=o.cat[k];if(!PRO[k])continue;
+    const hp=pct(hg,hi),mp=pct(c.g,c.i),hs=Math.round(hg/hisG*100),ms=myG?Math.round(c.g/myG*100):0;
+    if(c.i>=3&&hi>=3&&mp<hp-15)out.push({n:'mejora',h:`${PRO[k].l}: tú ${mp} %, ${r.n} ${hp} %`,p:TIPS[k]||''});
+    if(hs>=20&&myG>=5&&ms<hs/2)out.push({n:'mejora',h:`${r.n} saca el ${hs} % de sus goles en ${PRO[k].l.toLowerCase()}; tú el ${ms} %`,p:k==='ca'?'Corre en cada recuperación de balón, incluso si no es tu turno: es el gol más barato del handball.':k==='7m'?'Pide ser lanzador de penales en los entrenamientos y registra cada uno aquí para demostrar tu porcentaje.':k==='bt'?'Busca más el 1 vs 1: amaga el tiro y entra por el hombro libre del defensor.':`Busca más situaciones de ${PRO[k].l.toLowerCase()} en el juego de tu equipo.`});
+  }
+  return out;
+}
+function renderRef(o){
+  const {g,r}=currentRef(),list=REFS[g];
+  $('refGroup').innerHTML=Object.keys(GROUPS).map(k=>`<option value="${k}"${k===g?' selected':''}>${GROUPS[k]}${k===posGroup()?' (tu posición)':''}</option>`).join('');
+  $('refSel').innerHTML=list.map((x,i)=>`<option value="${i}"${x===r?' selected':''}>${esc(x.n)}</option>`).join('');
+  $('refEyebrow').textContent=`Referente de tu posición · ${GROUPS[g]} · ${state.view==='all'?'tus partidos':state.view==='train'?'tus entrenamientos':'esta sesión'}`;
+  const hp=pct(r.tot[0],r.tot[1]),mp=o.n?pct(o.g,o.n):null,src=SRC[r.src];
+  let right='';
+  const row=(lab,mg,mi,hg,hi)=>{const a=pct(mg,mi),b=pct(hg,hi);return `<div class="vsrow"><div class="lab"><span><b>${lab}</b></span><span class="num">Tú ${mi?`${mg}/${mi} · ${a} %`:'sin datos'} &nbsp;|&nbsp; ${esc(r.n.split(' ').slice(-1)[0])} ${hg}/${hi} · ${b} %</span></div><div class="tr me">${mi?`<i style="width:${a}%"></i>`:''}</div><div class="tr him" style="margin-top:3px"><i style="width:${b}%"></i></div></div>`};
+  right+=row('Total',o.g,o.n,r.tot[0],r.tot[1]);
+  if(r.tipos)for(const k in r.tipos){if(!PRO[k])continue;const c=o.cat[k];right+=row(PRO[k].l,c.g,c.i,r.tipos[k][0],r.tipos[k][1])}
+  else right+=`<p class="hint">La fuente solo publica su total de goles y lanzamientos en este torneo, sin desglose por tipo.</p>`;
+  if(r.tipos){const share=Object.keys(r.tipos).filter(k=>PRO[k]).map(k=>`${PRO[k].l.toLowerCase()} ${Math.round(r.tipos[k][0]/r.tot[0]*100)} %`).join(' · ');right+=`<p class="hint" style="margin:0">De dónde salen sus goles: ${share}.</p>`}
+  const cmp=refCompare(o);
+  $('refCard').innerHTML=`<div class="ref">
+    <div class="refid"><div class="eyebrow" style="color:inherit;opacity:.75">${esc(r.torneo)}</div><div class="rn">${esc(r.n)}</div>
+      <div class="rs">${esc([r.pos,r.pais].filter(Boolean).join(' · '))}</div>${r.club||r.fis?`<div class="rs">${esc([r.club,r.fis].filter(Boolean).join(' · '))}</div>`:''}
+      <div style="display:flex;gap:16px;align-items:baseline;margin-top:6px"><div><div class="big">${hp}%</div><div class="rs">${r.tot[0]} goles / ${r.tot[1]} tiros</div></div>
+      <div><div class="big" style="opacity:.6">${mp==null?'–':mp+'%'}</div><div class="rs">Tú: ${o.g}/${o.n}</div></div></div></div>
+    <div class="vs">${right}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Qué aprender de ${esc(r.n)}</div><ul class="keys">${r.claves.map(k=>`<li>${esc(k)}</li>`).join('')}${cmp.map(c=>`<li><b>${esc(c.h)}.</b> ${esc(c.p)}</li>`).join('')}</ul>
+    <p class="hint" style="margin-top:8px">Fuente: <a href="${src.u}" target="_blank" rel="noopener">${esc(src.t)}</a></p></div>`;
+}
+function renderTally(o){
+  const pen=o.sit['7m'],ca=o.sit.ca;
+  $('tally').innerHTML=[['g',o.g,'Goles'],['f',o.n-o.g,'Tiros fallados'],['g',pen.g,'Penales metidos'],['f',pen.i-pen.g,'Penales fallados'],['',ca.i?`${ca.g}/${ca.i}`:'0','Contraataques (gol/total)']]
+    .map(([c,v,l])=>`<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+  const ap=compute(state.matches.filter(m=>!isEnt(m)).flatMap(m=>mine(m.shots))),pp=ap.sit['7m'];
+  const lbl=state.view==='all'?'todos los partidos':state.view==='train'?'todos los entrenamientos':'esta sesión';
+  $('tallyNote').textContent=`Conteo de ${lbl}. Total en partidos: ${ap.g} goles · penales ${pp.g} metidos y ${pp.i-pp.g} fallados.`;
+}
+function render(){renderCountdown();renderPlayers();renderProfile();const o=compute(shotsInView());renderGoal(o);renderTally(o);renderRef(o);renderEntry();renderStats(o);
+  $('vMatch').setAttribute('aria-pressed',state.view==='match');$('vAll').setAttribute('aria-pressed',state.view==='all');$('vTrain').setAttribute('aria-pressed',state.view==='train');}
+
+/* ---------- Escritura ---------- */
+const writing={};
+function saveMatch(id){
+  if(local||!db)return;
+  if(writing[id]){writing[id].dirty=true;return}
+  writing[id]={dirty:false};
+  (async()=>{do{writing[id].dirty=false;const m=state.matches.find(x=>x.id===id);if(!m)break;const {id:_,...body}=m;
+    try{await db.doc('partidos/'+id).set(body)}catch(e){toast(e&&e.code==='quota_exceeded'?'Espacio lleno: borra partidos antiguos.':'No se pudo guardar. Revisa tu conexión.');if(e&&e.code==='invalid_argument'){writable=false;render()}break}
+  }while(writing[id].dirty);delete writing[id]})();
+}
+function addShot(r){
+  const m=cur();if(!m)return;if(r!=='fue'&&state.zone==null)return;
+  const shot={z:r==='fue'?-1:state.zone,r,s:state.sit,p:state.pos,j:state.playerId,t:Date.now()};
+  m.shots=[...(m.shots||[]),shot];state.zone=null;render();saveMatch(m.id);
+  toast(`${RES[r]} registrado`);
+}
+
+/* ---------- Eventos ---------- */
+$('goal').addEventListener('click',e=>{const g=e.target.closest('.zone');if(!g)return;const z=+g.dataset.z;state.zone=state.zone===z?null:z;render()});
+$('goal').addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const g=e.target.closest('.zone');if(!g)return;e.preventDefault();state.zone=+g.dataset.z;render();$('bGol').focus()});
+$('sitChips').addEventListener('click',e=>{const b=e.target.closest('[data-sit]');if(!b)return;state.sit=b.dataset.sit;render()});
+$('posChips').addEventListener('click',e=>{const b=e.target.closest('[data-pos]');if(!b)return;state.pos=b.dataset.pos;render()});
+$('bGol').onclick=()=>addShot('gol');$('bAta').onclick=()=>addShot('ata');$('bFue').onclick=()=>addShot('fue');
+$('undoBtn').onclick=()=>{const m=cur();if(!m)return;const sh=m.shots||[];let k=-1;for(let i=sh.length-1;i>=0;i--)if((sh[i].j||'yo')===state.playerId){k=i;break}
+  if(k<0)return;m.shots=sh.filter((_,i)=>i!==k);render();saveMatch(m.id);toast('Último lanzamiento borrado')};
+$('vMatch').onclick=()=>{state.view='match';render()};$('vAll').onclick=()=>{state.view='all';render()};$('vTrain').onclick=()=>{state.view='train';render()};
+const openPhoto=()=>{if(writable)$('quickFoto').click()};
+$('photo').onclick=openPhoto;$('photo').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPhoto()}});
+$('quickFoto').addEventListener('change',async()=>{const f=$('quickFoto').files[0];if(!f)return;let foto;try{foto=await shrink(f)}catch(_){toast('No se pudo leer la foto');return}
+  $('quickFoto').value='';const pid=state.playerId,{id:_x,...base}=player(),p={...base,foto};
+  if(pid==='yo')state.profile=p;else state.mates=state.mates.map(m=>m.id===pid?{id:pid,...p}:m);render();
+  if(!local&&db){try{await db.doc(pid==='yo'?'perfil/jugador':'companeros/'+pid).set(p);toast('Foto guardada')}catch(_){toast('No se pudo guardar la foto')}}});
+$('shareUrl').value=location.origin+location.pathname;
+let qrDone=false;
+$('shareBtn').onclick=()=>{const p=$('sharePanel');p.hidden=!p.hidden;
+  if(!p.hidden&&!qrDone&&window.QRCode){new QRCode($('qrBox'),{text:$('shareUrl').value,width:160,height:160,colorDark:'#0F1E2C',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});qrDone=true}};$('closeShare').onclick=()=>$('sharePanel').hidden=true;
+$('copyUrl').onclick=async()=>{const u=$('shareUrl');try{await navigator.clipboard.writeText(u.value);toast('Link copiado')}catch(_){u.select();toast('Link seleccionado: cópialo con el menú')}};
+$('refGroup').onchange=e=>{state.refGroup=e.target.value;state.refIdx=0;render()};
+$('refSel').onchange=e=>{state.refIdx=+e.target.value;render()};
+$('sources').innerHTML=Object.values(SRC).map(s=>`<a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a>`).join(' · ');
+$('tPartido').onclick=()=>{state.newTipo='partido';render()};$('tEntreno').onclick=()=>{state.newTipo='entreno';render()};
+$('players').addEventListener('click',e=>{if(e.target.closest('#addMate')){$('newMateForm').hidden=false;$('nmMate').focus();return}
+  const b=e.target.closest('[data-pl]');if(!b)return;state.playerId=b.dataset.pl;state.editing=false;state.confirmMate=false;state.refGroup=null;state.refIdx=0;render()});
+$('mateCancel').onclick=()=>$('newMateForm').hidden=true;
+$('newMateForm').addEventListener('submit',async e=>{e.preventDefault();const nombre=$('nmMate').value.trim();if(!nombre){$('nmMate').focus();return}
+  const id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);const mate={nombre,creado:Date.now()};
+  state.mates=[...state.mates,{id,...mate}];state.playerId=id;$('newMateForm').hidden=true;$('nmMate').value='';render();$('editBtn').click();
+  if(!local&&db){try{await db.doc('companeros/'+id).set(mate);toast(`${nombre} agregado`)}catch(_){toast('No se pudo guardar el compañero')}}});
+$('delMate').onclick=async()=>{const id=state.playerId;if(id==='yo')return;if(!state.confirmMate){state.confirmMate=true;render();return}
+  state.confirmMate=false;state.editing=false;state.mates=state.mates.filter(m=>m.id!==id);state.playerId='yo';render();
+  if(!local&&db){try{await db.doc('companeros/'+id).delete();toast('Compañero eliminado. Sus lanzamientos quedan guardados en las sesiones.')}catch(_){toast('No se pudo eliminar')}}};
+$('matchSel').onchange=e=>{state.currentId=e.target.value;state.view='match';render()};
+$('newMatchBtn').onclick=()=>{$('newMatchForm').hidden=false;$('nmFecha').value=new Date().toLocaleDateString('en-CA');$('nmNombre').focus()};
+$('nmCancel').onclick=()=>$('newMatchForm').hidden=true;
+$('newMatchForm').addEventListener('submit',async e=>{e.preventDefault();const nombre=$('nmNombre').value.trim();if(!nombre){$('nmNombre').focus();return}
+  const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const m={id,nombre,tipo:state.newTipo,fecha:$('nmFecha').value,creado:Date.now(),shots:[]};
+  state.matches=[m,...state.matches];state.currentId=id;state.view='match';$('newMatchForm').hidden=true;$('nmNombre').value='';render();saveMatch(id);toast(state.newTipo==='entreno'?'Entrenamiento creado':'Partido creado')});
+$('matchList').addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b)return;const id=b.dataset.del;
+  if(state.confirmDel!==id){state.confirmDel=id;render();return}
+  state.confirmDel=null;state.matches=state.matches.filter(m=>m.id!==id);if(state.currentId===id)state.currentId=state.matches[0]?.id||null;render();
+  if(!local&&db){try{await db.doc('partidos/'+id).delete();toast('Partido eliminado')}catch(_){toast('No se pudo eliminar')}}});
+$('editBtn').onclick=()=>{const p=player();state.editing=true;
+  $('fNombre').value=p.nombre||'';$('fNumero').value=p.numero||'';$('fPosicion').value=p.posicion||'';$('fAltura').value=p.altura||'';$('fPeso').value=p.peso||'';$('fMano').value=p.mano||'';$('fEdad').value=p.edad||'';$('fEquipo').value=p.equipo||'';$('fFoto').value='';render();$('fNombre').focus()};
+$('cancelEdit').onclick=()=>{state.editing=false;render()};
+function shrink(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const W=360,H=450,c=document.createElement('canvas');c.width=W;c.height=H;const k=Math.max(W/img.width,H/img.height),w=img.width*k,h=img.height*k;c.getContext('2d').drawImage(img,(W-w)/2,(H-h)/2,w,h);res(c.toDataURL('image/jpeg',.82))};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+$('profileForm').addEventListener('submit',async e=>{e.preventDefault();
+  const pid=state.playerId,{id:_pid,...base}=player();
+  const p={...base,nombre:$('fNombre').value.trim(),numero:$('fNumero').value.trim(),posicion:$('fPosicion').value,altura:$('fAltura').value.trim(),peso:$('fPeso').value.trim(),mano:$('fMano').value,edad:$('fEdad').value.trim(),equipo:$('fEquipo').value.trim()};
+  const f=$('fFoto').files[0];if(f){try{p.foto=await shrink(f)}catch(_){toast('No se pudo leer la foto')}}
+  if(pid==='yo')state.profile=p;else state.mates=state.mates.map(m=>m.id===pid?{id:pid,...p}:m);
+  state.editing=false;render();
+  if(!local&&db){try{await db.doc(pid==='yo'?'perfil/jugador':'companeros/'+pid).set(p);toast('Ficha guardada')}catch(_){toast('No se pudo guardar la ficha')}}});
+
+/* ---------- Coach (desactivado en la versión propia) ---------- */
+$('coachBtn').onclick=async()=>{
+  const o=compute(state.matches.flatMap(m=>mine(m.shots)));const p=player();
+  const op=compute(state.matches.filter(m=>!isEnt(m)).flatMap(m=>mine(m.shots))),oe=compute(state.matches.filter(isEnt).flatMap(m=>mine(m.shots)));
+  const evo=state.matches.map(m=>({m,c:compute(mine(m.shots))})).filter(x=>x.c.n).sort((a,b)=>(a.m.fecha||'').localeCompare(b.m.fecha||'')).map(x=>`${x.m.fecha||'s/f'} ${isEnt(x.m)?'entreno':'partido'} ${x.c.g}/${x.c.n}`).join('; ');
+  const zonas=o.zones.map((z,i)=>`${zoneName(i)}: ${z.g}/${z.i}`).join('; ');
+  const cats=Object.keys(PRO).map(k=>`${PRO[k].l}: ${o.cat[k].g}/${o.cat[k].i} (ref. pro ~${PRO[k].v}%)`).join('; ');
+  const dias=Math.ceil((NACIONAL-new Date())/864e5);
+  const prompt=`Eres un entrenador de handball de alto nivel. Responde en español de Chile, claro y directo, sin markdown pesado (usa guiones simples).
+Jugador: ${p.nombre||'—'}, posición ${p.posicion||'no indicada'}, ${p.altura||'?'} cm, ${p.peso||'?'} kg, mano ${p.mano||'?'}.
+Faltan ${dias} días para el Nacional universitario.
+Datos de todas sus sesiones (${state.matches.length}, partidos y entrenamientos): ${o.n} lanzamientos, ${o.g} goles, ${o.fue} fuera/poste.
+Por zona del arco (vista del lanzador, goles/intentos a portería): ${zonas}.
+Por tipo de lanzamiento: ${cats}.
+Primer palo ${o.palo.primer.g}/${o.palo.primer.i}; segundo palo ${o.palo.segundo.g}/${o.palo.segundo.i}.
+En partidos: ${op.g}/${op.n}. En entrenamientos: ${oe.g}/${oe.n}.
+Evolución por sesión (fecha, tipo, goles/lanzamientos): ${evo||'sin datos'}.
+${(()=>{const {g,r}=currentRef();return `Posición del jugador: ${GROUPS[g]}.
+Referencia oficial EHF EURO 2024 (todo el torneo, efectividad por tipo de tiro): ${Object.values(PRO).map(x=>`${x.l} ${x.v}% (${x.g}/${x.i})`).join('; ')}.
+Jugador top de referencia: ${r.n} (${r.pos}, ${r.torneo}): ${r.tot[0]}/${r.tot[1]}${r.tipos?'; por tipo: '+Object.entries(r.tipos).filter(([k])=>PRO[k]).map(([k,v])=>`${PRO[k].l} ${v[0]}/${v[1]}`).join('; '):''}. Claves: ${r.claves.join(' ')}`})()}
+Usa SOLO estas cifras como datos profesionales; no inventes estadísticas nuevas. Compara al jugador con la referencia del torneo y con el jugador top, considerando que es un jugador universitario (no esperes el mismo nivel, sí la misma lógica de juego).
+Dame: 1) un diagnóstico en 3 líneas, 2) qué copiarle al jugador top de su posición, 3) las 3 prioridades de mejora con un ejercicio concreto cada una (series y repeticiones), 4) un plan semanal simple hasta el Nacional. Si los datos son pocos, dilo y explica qué registrar.`;
+  const out=$('coachOut');out.hidden=false;out.textContent='Pensando…';$('coachBtn').disabled=true;
+  try{await sample(prompt,{modelTier:'default',onText:({text})=>{out.textContent=text}})}
+  catch(e){if(e&&e.code==='not_granted'){$('coachBox').hidden=true}else out.textContent=(e&&e.text)||'No se pudo obtener el análisis. Intenta de nuevo en un momento.'}
+  finally{$('coachBtn').disabled=false}
+};
+
+/* ---------- Inicio: Firebase ---------- */
+const DOMINIO='miarco.app';
+const toEmail=u=>{u=u.trim().toLowerCase();return u.includes('@')?u:`${u}@${DOMINIO}`};
+function adapter(fs){
+  const wrapDoc=s=>({id:s.id,exists:s.exists(),data:()=>s.data()});
+  return {
+    doc:p=>({set:d=>setDoc(doc(fs,p),d),delete:()=>deleteDoc(doc(fs,p)),get:async()=>wrapDoc(await getDoc(doc(fs,p))),
+      onSnapshot:(n,e)=>onSnapshot(doc(fs,p),s=>n(wrapDoc(s)),e)}),
+    collection:p=>({orderBy:(f,d)=>({onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),orderBy(f,d||'asc')),q=>n({docs:q.docs.map(wrapDoc),empty:q.empty}),e)}),
+      get:async()=>{const q=await getDocs(collection(fs,p));return {empty:q.empty,docs:q.docs.map(wrapDoc)}}})
+  };
+}
+const unsubs=[];
+function startData(){
+  db.doc('perfil/jugador').onSnapshot(snap=>{if(snap.exists&&!state.editing){state.profile={...snap.data()};render()}checkEmpty()},()=>{});
+  unsubs.push(db.collection('companeros').orderBy('creado','asc').onSnapshot(snap=>{if(state.editing&&state.playerId!=='yo')return;
+    state.mates=snap.docs.map(x=>({id:x.id,...x.data()}));if(state.playerId!=='yo'&&!state.mates.some(m=>m.id===state.playerId))state.playerId='yo';render()},()=>{}));
+  unsubs.push(db.collection('partidos').orderBy('creado','desc').onSnapshot(snap=>{
+    const loc=Object.fromEntries(state.matches.map(m=>[m.id,m]));
+    state.matches=snap.docs.map(x=>writing[x.id]&&loc[x.id]?loc[x.id]:{id:x.id,...x.data()});
+    for(const id in writing)if(loc[id]&&!state.matches.some(m=>m.id===id))state.matches.unshift(loc[id]);
+    if(!state.matches.some(m=>m.id===state.currentId))state.currentId=state.matches[0]?.id||null;
+    render();checkEmpty();
+  },e=>toast('Se perdió la conexión con tus datos. Recarga la página.')));
+}
+let emptyChecked=false;
+async function checkEmpty(){if(emptyChecked||!db)return;emptyChecked=true;
+  try{const [p,m]=await Promise.all([db.doc('perfil/jugador').get(),db.collection('partidos').get()]);$('importBox').hidden=!(!p.exists&&m.empty)}catch(_){}}
+$('importBtn').onclick=async()=>{$('importBtn').disabled=true;
+  try{const r=await fetch('data-inicial.json',{cache:'no-store'});const d=await r.json();
+    if(d.perfil)await db.doc('perfil/jugador').set(d.perfil);
+    for(const [id,v] of Object.entries(d.companeros||{}))await db.doc('companeros/'+id).set(v);
+    for(const [id,v] of Object.entries(d.partidos||{}))await db.doc('partidos/'+id).set(v);
+    $('importBox').hidden=true;toast('Datos importados')}catch(e){toast('No se pudo importar: '+(e.message||e));$('importBtn').disabled=false}};
+render();
+if(!window.FIREBASE_CONFIG||String(window.FIREBASE_CONFIG.apiKey||'').startsWith('PEGA')){showLocal()}
+else{
+  const app=initializeApp(window.FIREBASE_CONFIG);
+  const auth=getAuth(app);
+  let fs;try{fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(_){fs=getFirestore(app)}
+  $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const u=$('lgUser').value,p=$('lgPass').value;if(!u||!p)return;
+    $('lgBtn').disabled=true;$('lgMsg').textContent='Entrando…';
+    try{await signInWithEmailAndPassword(auth,toEmail(u),p)}
+    catch(err){const c=err.code||'';$('lgMsg').textContent=c.includes('invalid')||c.includes('wrong')||c.includes('not-found')?'Usuario o contraseña incorrectos.':c.includes('too-many')?'Demasiados intentos. Espera unos minutos.':c.includes('network')?'Sin conexión a internet.':'No se pudo entrar ('+c+').'}
+    finally{$('lgBtn').disabled=false}});
+  $('logoutBtn').onclick=()=>signOut(auth);
+  onAuthStateChanged(auth,user=>{
+    if(!user){$('login').hidden=false;$('logoutBtn').hidden=true;$('whoami').textContent='';unsubs.splice(0).forEach(f=>f());db=null;local=true;return}
+    $('login').hidden=true;$('logoutBtn').hidden=false;$('whoami').textContent=user.email.replace('@'+DOMINIO,'');
+    $('lgPass').value='';$('lgMsg').textContent='';
+    db=adapter(fs);local=false;writable=true;emptyChecked=false;render();startData();
+  });
+}
+function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice');n.hidden=false;n.textContent='Modo de prueba: falta conectar la base de datos (firebase-config.js). Lo que registres ahora no se guarda.';
+  if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
+setInterval(renderCountdown,6e4);
+</script>
+</body>
+</html>
