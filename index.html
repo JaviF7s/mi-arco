@@ -158,6 +158,7 @@ svg.goal{width:100%;height:auto;display:block}
 .evo svg{width:100%;min-width:420px;height:auto;display:block}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:14px;z-index:5}
 @media (max-width:520px){#sharePanel{grid-template-columns:1fr!important;justify-items:start}}
+.updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:20;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 18px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 .login{position:fixed;inset:0;z-index:10;background:var(--bg);display:grid;place-items:center;padding:16px}
 #qrBox img,#qrBox canvas{width:100%!important;height:auto!important;display:block}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -364,6 +365,7 @@ svg.goal{width:100%;height:auto;display:block}
   </footer>
 </div>
 <div class="toast" id="toast" hidden></div>
+<button id="updBar" class="updbar" hidden>Hay una actualización · <b>Tocar para actualizar</b></button>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -796,6 +798,14 @@ else{
 function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice');n.hidden=false;n.textContent='Modo de prueba: falta conectar la base de datos (firebase-config.js). Lo que registres ahora no se guarda.';
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
+/* ---------- Aviso de nueva versión ---------- */
+const APP_VERSION='20261009041311';
+let newVersion=null;
+if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
+async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
+  if(v&&v!==APP_VERSION){newVersion=v;$('updBar').hidden=false}}catch(_){}}
+$('updBar').onclick=()=>{location.replace(location.pathname+'?v='+encodeURIComponent(newVersion||Date.now()))};
+setInterval(checkUpdate,60e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});setTimeout(checkUpdate,5e3);
 </script>
 </body>
 </html>
