@@ -160,6 +160,19 @@ svg.goal{width:100%;height:auto;display:block}
 @media (max-width:520px){#sharePanel{grid-template-columns:1fr!important;justify-items:start}}
 .notice.viewing{border-style:solid;border-color:var(--accent);color:var(--ink);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
 
+
+.road{display:grid;gap:12px}
+.weeks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.weeks{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.wk{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:2px;background:var(--surface2);min-width:0}
+.wk.empty{background:transparent;border-style:dashed}
+.wk.now{border-color:var(--accent);border-width:2px}
+.wk .wn{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.wk .wd{font-size:12px;color:var(--muted)}
+.wk .wp{font-family:var(--display);font-size:26px;font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums}
+.wk .ws{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.wk.final{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wk.final .wn,.wk.final .wd,.wk.final .ws{color:inherit;opacity:.8}
 /* ---- Inicio rápido ---- */
 .quick{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-color:var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),var(--surface))}
 button.big{padding:14px 18px;font-size:16px}
@@ -286,6 +299,14 @@ button.big{padding:14px 18px;font-size:16px}
       <button class="primary" type="submit" id="qsGo">Empezar</button>
       <button class="ghost" type="button" id="qsCancel">Cancelar</button>
     </form>
+  </section>
+
+  <section class="panel road" id="road" hidden>
+    <div class="row" style="justify-content:space-between">
+      <div><div class="eyebrow">Una sesión por semana hasta el 22 de noviembre</div><h2 style="font-size:22px">Camino al Nacional</h2></div>
+      <span class="hint" id="roadSum"></span>
+    </div>
+    <div class="weeks" id="weeks"></div>
   </section>
   <section class="panel" style="display:grid;gap:10px;padding:12px 16px" aria-label="Jugadores">
     <div class="row" style="justify-content:space-between">
@@ -756,7 +777,7 @@ function renderTally(o){
   const lbl=state.view==='all'?'todos los partidos':state.view==='train'?'todos los entrenamientos':'esta sesión';
   $('tallyNote').textContent=`Conteo de ${lbl}. Total en partidos: ${ap.g} goles · penales ${pp.g} metidos y ${pp.i-pp.g} fallados.`;
 }
-function render(){renderCountdown();renderPlayers();renderProfile();const o=compute(shotsInView());renderGoal(o);renderTally(o);renderRef(o);renderEntry();renderStats(o);renderQuick();renderLive();
+function render(){renderCountdown();renderPlayers();renderProfile();const o=compute(shotsInView());renderGoal(o);renderTally(o);renderRef(o);renderEntry();renderStats(o);renderQuick();renderRoad();renderLive();
   $('vMatch').setAttribute('aria-pressed',state.view==='match');$('vAll').setAttribute('aria-pressed',state.view==='all');$('vTrain').setAttribute('aria-pressed',state.view==='train');}
 
 /* ---------- Escritura ---------- */
@@ -776,6 +797,27 @@ function addShot(r){
   toast(`${RES[r]} registrado`);
 }
 
+
+
+/* ---------- Camino al Nacional ---------- */
+const ROAD_START=new Date(2026,9,12); /* lunes 12 oct 2026 */
+const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function renderRoad(){
+  const box=$('road');box.hidden=local&&!state.matches.length;if(box.hidden)return;
+  const iso=d=>d.toLocaleDateString('en-CA');const today=iso(new Date());
+  const weeks=[];for(let i=0;i<6;i++){const a=new Date(ROAD_START);a.setDate(a.getDate()+7*i);const b=new Date(a);b.setDate(b.getDate()+6);weeks.push({a,b,ia:iso(a),ib:iso(b)})}
+  let done=0;const pts=[];
+  const cards=weeks.map((w,i)=>{
+    const ss=state.matches.filter(m=>m.fecha&&m.fecha>=w.ia&&m.fecha<=w.ib);
+    const c=compute(ss.flatMap(m=>mine(m.shots)));const now=today>=w.ia&&today<=w.ib;
+    const rng=`${w.a.getDate()}${w.a.getMonth()!==w.b.getMonth()?' '+MESES[w.a.getMonth()]:''}–${w.b.getDate()} ${MESES[w.b.getMonth()]}`;
+    if(c.n){done++;pts.push(pct(c.g,c.n))}
+    const tipo=ss.length?(ss.some(m=>!isEnt(m))&&ss.some(isEnt)?'partido + entreno':ss.some(m=>!isEnt(m))?'partido':'entrenamiento'):'';
+    return `<div class="wk${c.n?'':' empty'}${now?' now':''}"><div class="wn">${i===5?'Semana Nacional':'Semana '+(i+1)}${now?' · ahora':''}</div><div class="wd">${rng}</div>
+      ${c.n?`<div class="wp" style="color:${colorFor(pct(c.g,c.n))}">${pct(c.g,c.n)}%</div><div class="ws">${c.g}/${c.n} · ${tipo}</div>`:`<div class="wp" style="opacity:.35">–</div><div class="ws">${today>w.ib?'sin registro':'pendiente'}</div>`}</div>`});
+  $('weeks').innerHTML=cards.join('');
+  $('roadSum').textContent=`${done} de 6 semanas registradas`+(pts.length>=2?` · de ${pts[0]}% a ${pts[pts.length-1]}%`:'');
+}
 
 /* ---------- Modo en vivo (cancha) ---------- */
 const OUT={fuera:'Fuera',poste:'Poste'};
@@ -1044,7 +1086,7 @@ function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261015034346';
+const APP_VERSION='20261015034809';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
