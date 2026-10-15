@@ -993,6 +993,8 @@ Dame: 1) un diagnóstico en 3 líneas, 2) qué copiarle al jugador top de su pos
 /* ---------- Inicio: Firebase ---------- */
 const DOMINIO='miarco.app';
 const ADMINS=['javi@'+DOMINIO];
+const SIN_LOGIN=true;          /* true = la app abre directo, sin usuario ni contraseña */
+const ESPACIO='usuarios/javi'; /* donde se guardan los datos cuando no hay inicio de sesión */
 const toEmail=u=>{u=u.trim().toLowerCase();return u.includes('@')?u:`${u}@${DOMINIO}`};
 const userName=e=>(e||'').replace('@'+DOMINIO,'');
 let FS=null,ME=null,isAdmin=false,viewing=null,users=[];
@@ -1077,6 +1079,28 @@ else{
     finally{$('lgBtn').disabled=false}});
   $('logoutBtn').onclick=()=>signOut(auth);
   let usersUnsub=null;
+  if(SIN_LOGIN){
+    /* Sin inicio de sesión: un solo espacio fijo, abierto por las reglas de Firestore */
+    $('login').hidden=true;$('logoutBtn').hidden=true;$('acctSel').hidden=true;$('whoami').textContent='';
+    let started=false;
+    const unsubAuth=onAuthStateChanged(auth,async user=>{
+      if(started)return;started=true;
+      const space=adapter(FS,ESPACIO);
+      let migrated=false;
+      try{const f=await adapter(FS,'').doc(ESPACIO).get();migrated=f.exists&&f.data().copiado}catch(_){}
+      if(user&&!migrated){
+        /* Este dispositivo tenía la sesión antigua abierta: copiar esa cuenta al espacio fijo */
+        try{const old=adapter(FS,'usuarios/'+user.uid);
+          const pf=await old.doc('perfil/jugador').get();
+          if(pf.exists){await space.doc('perfil/jugador').set(pf.data());
+            for(const c of ['companeros','partidos']){const q=await old.collection(c).get();for(const d of q.docs)await space.doc(c+'/'+d.id).set(d.data())}
+            await adapter(FS,'').doc(ESPACIO).set({usuario:'javi',copiado:Date.now()});toast('Tus datos ya están en la versión sin inicio de sesión')}
+        }catch(e){console.warn('copia',e)}
+      }
+      db=space;local=false;writable=true;resetState();render();startData();
+      try{const pf=await space.doc('perfil/jugador').get();if(!pf.exists)$('importBox').hidden=false}catch(_){}
+    });
+  }else
   onAuthStateChanged(auth,async user=>{
     if(!user){$('login').hidden=false;$('logoutBtn').hidden=true;$('whoami').textContent='';$('acctSel').hidden=true;$('viewNotice').hidden=true;
       stopData();if(usersUnsub){usersUnsub();usersUnsub=null}db=null;local=true;ME=null;resetState();render();return}
@@ -1092,7 +1116,7 @@ function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261015040844';
+const APP_VERSION='20261015041058';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
