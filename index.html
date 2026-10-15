@@ -159,6 +159,68 @@ svg.goal{width:100%;height:auto;display:block}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:14px;z-index:5}
 @media (max-width:520px){#sharePanel{grid-template-columns:1fr!important;justify-items:start}}
 .notice.viewing{border-style:solid;border-color:var(--accent);color:var(--ink);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+
+/* ---- Inicio rápido ---- */
+.quick{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-color:var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),var(--surface))}
+button.big{padding:14px 18px;font-size:16px}
+/* ---- Modo en vivo ---- */
+.live{position:fixed;inset:0;z-index:15;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(10px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.lv-in{max-width:560px;margin:0 auto;display:grid;gap:10px}
+.lv-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lv-kind{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--bad);font-weight:700;display:flex;align-items:center;gap:6px}
+.lv-kind::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bad);animation:pulse 1.4s infinite}
+.lv-kind.ent{color:var(--accent)}.lv-kind.ent::before{background:var(--accent)}
+@keyframes pulse{50%{opacity:.25}}
+.lv-name{font-family:var(--display);font-size:24px;font-weight:800;line-height:1.05;overflow-wrap:anywhere}
+.lv-end{background:var(--ink);color:var(--bg);border-color:var(--ink);padding:10px 16px}
+.lv-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.lv-score div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:center}
+.lv-score b{display:block;font-family:var(--display);font-size:28px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.lv-score span{font-size:11px;color:var(--muted)}
+.lv-score .g b{color:var(--good)}.lv-score .f b{color:var(--bad)}
+.lv-row{display:flex;gap:8px;align-items:center;min-width:0}
+.lv-lab{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;width:52px;flex:none}
+.lv-chips,.lv-players{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;min-width:0}
+.lv-chips::-webkit-scrollbar,.lv-players::-webkit-scrollbar{display:none}
+.lv-chips button,.lv-players button{flex:none;border-radius:999px;padding:8px 12px;font-size:14px;white-space:nowrap}
+.lv-chips button[aria-pressed="true"],.lv-players button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lv-hint{text-align:center;font-weight:600;color:var(--muted);font-size:14px}
+.lv-frame{--pw:14px;padding:var(--pw) var(--pw) 0;background:repeating-linear-gradient(90deg,var(--post) 0 22px,var(--post2) 22px 44px);border-radius:4px 4px 0 0;position:relative}
+.lv-frame::before,.lv-frame::after{content:"";position:absolute;top:var(--pw);bottom:0;width:var(--pw);background:repeating-linear-gradient(180deg,var(--post2) 0 22px,var(--post) 22px 44px)}
+.lv-frame::before{left:0}.lv-frame::after{right:0}
+.lv-goal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);aspect-ratio:3/2;max-width:100%;background:var(--surface);background-image:linear-gradient(45deg,var(--net) 1px,transparent 1px),linear-gradient(-45deg,var(--net) 1px,transparent 1px);background-size:14px 14px}
+.lv-goal button{border:1px dashed color-mix(in srgb,var(--muted) 55%,transparent);border-radius:0;background:transparent;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;font-weight:700;min-height:0;transition:background .12s}
+.lv-goal button:active,.lv-goal button.sel{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.lv-goal .zl1{font-size:clamp(11px,3.2vw,15px);text-transform:uppercase;letter-spacing:.06em}
+.lv-goal .zl2{font-size:clamp(10px,2.8vw,13px);font-weight:500;color:var(--muted)}
+.lv-goal .zc{font-family:var(--display);font-size:clamp(14px,4vw,20px);font-weight:900;padding:0 8px;border-radius:999px;color:#fff;margin-top:2px}
+.lv-floor{display:flex;justify-content:space-between;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;margin:0 calc(-1 * var(--pw));position:relative;z-index:1}
+.lv-out{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lv-out button{padding:14px;font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:.04em;background:var(--surface)}
+.lv-last{display:grid;gap:6px}
+.lv-shot{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.lv-shot .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.lv-shot .tx{flex:1;min-width:0;font-size:14px}
+.lv-shot .tx small{display:block;color:var(--muted);font-size:12px}
+.lv-shot button{padding:6px 10px;font-size:13px}
+.lv-sheet{position:fixed;inset:0;z-index:16;background:rgba(5,12,20,.55);display:flex;align-items:flex-end;justify-content:center}
+.lv-sheet-in{background:var(--surface);width:100%;max-width:560px;border-radius:16px 16px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+.lv-sheet-t{font-family:var(--display);font-size:30px;font-weight:900;text-align:center;line-height:1.05}
+.lv-sheet-s{text-align:center;color:var(--muted);font-size:14px;margin-top:-6px}
+.lv-sheet-b{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lv-sheet-b button{padding:26px 8px;font-family:var(--display);font-size:28px;font-weight:900;letter-spacing:.04em;border-radius:12px}
+.lv-gol{background:var(--good);border-color:var(--good);color:#fff}
+.lv-ata{background:var(--surface2)}
+.lv-flash{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:17;padding:18px 26px;border-radius:14px;font-family:var(--display);font-size:30px;font-weight:900;color:#fff;text-align:center;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:pop .9s ease forwards}
+.lv-flash small{display:block;font-family:var(--body);font-size:14px;font-weight:600;opacity:.9}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-40%) scale(.9)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
+.lv-sum{position:fixed;inset:0;z-index:18;background:var(--bg);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.lv-sum .in{max-width:560px;margin:0 auto;display:grid;gap:14px;min-width:0}
+.lv-sum .lv-score{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lv-sum .nbig{font-family:var(--display);font-size:64px;font-weight:900;line-height:1}
+.lv-sum .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;aspect-ratio:3/2;max-width:100%}
+.lv-sum .mini div{border-radius:6px;display:grid;place-items:center;text-align:center;font-weight:700;font-size:13px;background:var(--surface2);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.lv-flash{animation:none}.lv-kind::before{animation:none}}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:20;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 18px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 .login{position:fixed;inset:0;z-index:10;background:var(--bg);display:grid;place-items:center;padding:16px}
 #qrBox img,#qrBox canvas{width:100%!important;height:auto!important;display:block}
@@ -207,6 +269,24 @@ svg.goal{width:100%;height:auto;display:block}
     <button class="primary" id="importBtn">Importar mis datos</button>
   </div>
 
+
+  <section class="panel quick" id="quickStart" hidden>
+    <div style="min-width:0">
+      <div class="eyebrow">Modo cancha</div>
+      <h2 style="font-size:26px">¿Juegas hoy?</h2>
+      <p class="hint" style="margin:4px 0 0" id="quickHint">Abre el arco en pantalla completa y anota cada tiro con dos toques.</p>
+    </div>
+    <div class="row">
+      <button class="primary big" id="qsPartido">Iniciar partido</button>
+      <button class="big" id="qsEntreno">Iniciar entrenamiento</button>
+      <button class="ghost big" id="qsSeguir" hidden>Seguir anotando</button>
+    </div>
+    <form id="qsForm" class="row" hidden style="flex-basis:100%">
+      <input id="qsNombre" placeholder="Nombre" style="flex:2 1 220px" aria-label="Nombre de la sesión">
+      <button class="primary" type="submit" id="qsGo">Empezar</button>
+      <button class="ghost" type="button" id="qsCancel">Cancelar</button>
+    </form>
+  </section>
   <section class="panel" style="display:grid;gap:10px;padding:12px 16px" aria-label="Jugadores">
     <div class="row" style="justify-content:space-between">
       <div class="eyebrow">Jugador que estás viendo y registrando</div>
@@ -367,6 +447,42 @@ svg.goal{width:100%;height:auto;display:block}
     <div id="sources"></div>
   </footer>
 </div>
+
+<div id="live" class="live" hidden role="dialog" aria-label="Partido en vivo">
+  <div class="lv-in">
+    <header class="lv-top">
+      <div style="min-width:0"><div class="lv-kind" id="lvKind">Partido en vivo</div><div class="lv-name" id="lvName"></div></div>
+      <button id="lvEnd" class="lv-end">Terminar</button>
+    </header>
+    <div class="lv-score" id="lvScore"></div>
+    <div class="lv-players" id="lvPlayers" hidden></div>
+    <div class="lv-row"><span class="lv-lab">Jugada</span><div class="lv-chips" id="lvSit"></div></div>
+    <div class="lv-row"><span class="lv-lab">Desde</span><div class="lv-chips" id="lvPos"></div></div>
+    <div class="lv-hint" id="lvHint">Toca dónde fue el tiro</div>
+    <div class="lv-frame">
+      <div class="lv-goal" id="lvGoal"></div>
+      <div class="lv-floor"><span>Palo izquierdo</span><span>Palo derecho</span></div>
+    </div>
+    <div class="lv-out">
+      <button id="lvFuera">Fuera</button>
+      <button id="lvPoste">Poste</button>
+    </div>
+    <div class="lv-last" id="lvLast"></div>
+  </div>
+  <div class="lv-sheet" id="lvSheet" hidden>
+    <div class="lv-sheet-in">
+      <div class="lv-sheet-t" id="lvSheetT"></div>
+      <div class="lv-sheet-s" id="lvSheetS"></div>
+      <div class="lv-sheet-b">
+        <button class="lv-gol" id="lvGol">GOL</button>
+        <button class="lv-ata" id="lvAta">ATAJADA</button>
+      </div>
+      <button class="ghost" id="lvCancel" style="width:100%">Cancelar</button>
+    </div>
+  </div>
+  <div class="lv-flash" id="lvFlash" hidden></div>
+  <div class="lv-sum" id="lvSum" hidden></div>
+</div>
 <div class="toast" id="toast" hidden></div>
 <button id="updBar" class="updbar" hidden>Hay una actualización · <b>Tocar para actualizar</b></button>
 
@@ -379,8 +495,8 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from
 import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const NACIONAL = new Date('2026-11-22T00:00:00-03:00');
-const ZROW=['Arriba','Media altura','Abajo'], ZCOL=['izquierda','centro','derecha'];
-const zoneName=z=>z<0?'Fuera':`${ZROW[Math.floor(z/3)]} ${ZCOL[z%3]}`;
+const ZROW=['Arriba','Media altura','Abajo'], ZCOL=['palo izquierdo','centro','palo derecho'];
+const zoneName=z=>z<0?'Fuera':`${ZROW[Math.floor(z/3)]} · ${ZCOL[z%3]}`;
 const SITS=[['pos','Ataque posicional'],['bt','Penetración 1 vs 1'],['ca','Contraataque'],['7m','7 metros']];
 const POSS=[['ei','Extremo izq.'],['li','Lateral izq.'],['c','Central'],['ld','Lateral der.'],['ed','Extremo der.'],['pv','Pivote']];
 const RES={gol:'Gol',ata:'Atajada',fue:'Fuera / poste'};
@@ -640,7 +756,7 @@ function renderTally(o){
   const lbl=state.view==='all'?'todos los partidos':state.view==='train'?'todos los entrenamientos':'esta sesión';
   $('tallyNote').textContent=`Conteo de ${lbl}. Total en partidos: ${ap.g} goles · penales ${pp.g} metidos y ${pp.i-pp.g} fallados.`;
 }
-function render(){renderCountdown();renderPlayers();renderProfile();const o=compute(shotsInView());renderGoal(o);renderTally(o);renderRef(o);renderEntry();renderStats(o);
+function render(){renderCountdown();renderPlayers();renderProfile();const o=compute(shotsInView());renderGoal(o);renderTally(o);renderRef(o);renderEntry();renderStats(o);renderQuick();renderLive();
   $('vMatch').setAttribute('aria-pressed',state.view==='match');$('vAll').setAttribute('aria-pressed',state.view==='all');$('vTrain').setAttribute('aria-pressed',state.view==='train');}
 
 /* ---------- Escritura ---------- */
@@ -659,6 +775,87 @@ function addShot(r){
   m.shots=[...(m.shots||[]),shot];state.zone=null;render();saveMatch(m.id);
   toast(`${RES[r]} registrado`);
 }
+
+
+/* ---------- Modo en vivo (cancha) ---------- */
+const OUT={fuera:'Fuera',poste:'Poste'};
+const live={on:false,zone:null,wake:null};
+const shotLabel=s=>s.z<0?(OUT[s.f]||'Fuera / poste'):zoneName(s.z);
+const sitName=k=>(SITS.find(x=>x[0]===k)||[,''])[1];
+const posName=k=>(POSS.find(x=>x[0]===k)||[,''])[1];
+function liveShots(){const m=cur();return m?mine(m.shots):[]}
+async function keepAwake(on){try{if(on&&'wakeLock' in navigator&&!live.wake){live.wake=await navigator.wakeLock.request('screen');live.wake.addEventListener?.('release',()=>live.wake=null)}
+  if(!on&&live.wake){await live.wake.release();live.wake=null}}catch(_){}}
+document.addEventListener('visibilitychange',()=>{if(live.on&&!document.hidden)keepAwake(true)});
+function openLive(){const m=cur();if(!m||!writable)return;live.on=true;live.zone=null;$('live').hidden=false;$('lvSum').hidden=true;document.body.style.overflow='hidden';keepAwake(true);renderLive()}
+function closeLive(){live.on=false;$('live').hidden=true;$('lvSheet').hidden=true;$('lvSum').hidden=true;document.body.style.overflow='';keepAwake(false);render()}
+function renderLive(){
+  if(!live.on)return;const m=cur();if(!m){closeLive();return}
+  const ent=isEnt(m);$('lvKind').textContent=ent?'Entrenamiento':'Partido en vivo';$('lvKind').classList.toggle('ent',ent);
+  $('lvName').textContent=m.nombre;
+  const sh=liveShots(),o=compute(sh),pen=o.sit['7m'];
+  $('lvScore').innerHTML=[['g',o.g,'Goles'],['f',o.n-o.g,'Fallados'],['',o.n?pct(o.g,o.n)+'%':'–','Efectividad'],['',pen.i?`${pen.g}/${pen.i}`:'0','Penales']].map(([c,v,l])=>`<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+  const all=[{id:'yo',...(state.profile||{})},...state.mates];
+  $('lvPlayers').hidden=all.length<2;
+  $('lvPlayers').innerHTML=all.map(p=>`<button data-lpl="${esc(p.id)}" aria-pressed="${p.id===state.playerId}">${esc(p.nombre||'Jugador')}</button>`).join('');
+  $('lvSit').innerHTML=SITS.map(([k,l])=>`<button data-lsit="${k}" aria-pressed="${k===state.sit}">${l}</button>`).join('');
+  $('lvPos').innerHTML=POSS.map(([k,l])=>`<button data-lpos="${k}" aria-pressed="${k===state.pos}">${l}</button>`).join('');
+  $('lvHint').textContent=state.sit==='7m'?'Penal: toca dónde fue el tiro':'Toca dónde fue el tiro';
+  $('lvGoal').innerHTML=[0,1,2,3,4,5,6,7,8].map(z=>{const d=o.zones[z],p=pct(d.g,d.i);
+    return `<button data-lz="${z}" class="${live.zone===z?'sel':''}" aria-label="${zoneName(z)}${d.i?`, ${d.g} de ${d.i}`:''}"><span class="zl1">${ZROW[Math.floor(z/3)].replace(' altura','')}</span><span class="zl2">${ZCOL[z%3].replace('palo ','Palo ').replace('centro','Centro')}</span>${d.i?`<span class="zc" style="background:${colorFor(p)}">${d.g}/${d.i}</span>`:''}</button>`}).join('');
+  const last=sh.map((s,i)=>({s,i})).slice(-4).reverse();
+  $('lvLast').innerHTML=last.length?`<div class="eyebrow">Últimos tiros</div>`+last.map(({s})=>{const c=s.r==='gol'?'var(--good)':s.r==='ata'?'var(--warn)':'var(--bad)';
+    return `<div class="lv-shot"><span class="dot" style="background:${c}"></span><div class="tx"><b>${s.r==='gol'?'Gol':s.r==='ata'?'Atajada':'Fallado'}</b> · ${esc(shotLabel(s))}<small>${esc(sitName(s.s))} · desde ${esc(posName(s.p))}</small></div><button class="ghost" data-ldel="${s.t}">Borrar</button></div>`}).join('')
+    :'<p class="hint" style="text-align:center;margin:0">Aún no hay tiros. ¡Vamos!</p>';
+}
+function flash(text,sub,color){const f=$('lvFlash');f.hidden=false;f.style.background=color;f.innerHTML=`${esc(text)}<small>${esc(sub)}</small>`;f.style.animation='none';void f.offsetWidth;f.style.animation='';clearTimeout(flash._t);flash._t=setTimeout(()=>f.hidden=true,950);try{navigator.vibrate?.(35)}catch(_){}}
+function liveAdd(r,f){
+  const m=cur();if(!m)return;const z=r==='fue'?-1:live.zone;if(r!=='fue'&&z==null)return;
+  const shot={z,r,s:state.sit,p:state.pos,j:state.playerId,t:Date.now()};if(f)shot.f=f;
+  m.shots=[...(m.shots||[]),shot];live.zone=null;$('lvSheet').hidden=true;saveMatch(m.id);render();
+  flash(r==='gol'?'¡GOL!':r==='ata'?'ATAJADA':OUT[f].toUpperCase(),r==='fue'?sitName(state.sit):zoneName(z),r==='gol'?'var(--good)':r==='ata'?'var(--warn)':'var(--bad)');
+}
+$('lvGoal').addEventListener('click',e=>{const b=e.target.closest('[data-lz]');if(!b)return;live.zone=+b.dataset.lz;
+  $('lvSheetT').textContent=zoneName(live.zone);$('lvSheetS').textContent=`${sitName(state.sit)} · desde ${posName(state.pos)}`;$('lvSheet').hidden=false;renderLive()});
+$('lvGol').onclick=()=>liveAdd('gol');$('lvAta').onclick=()=>liveAdd('ata');
+$('lvCancel').onclick=()=>{live.zone=null;$('lvSheet').hidden=true;renderLive()};
+$('lvSheet').addEventListener('click',e=>{if(e.target===$('lvSheet'))$('lvCancel').click()});
+$('lvFuera').onclick=()=>liveAdd('fue','fuera');$('lvPoste').onclick=()=>liveAdd('fue','poste');
+$('lvSit').addEventListener('click',e=>{const b=e.target.closest('[data-lsit]');if(!b)return;state.sit=b.dataset.lsit;if(state.sit==='7m')state.pos=state.pos;render()});
+$('lvPos').addEventListener('click',e=>{const b=e.target.closest('[data-lpos]');if(!b)return;state.pos=b.dataset.lpos;render()});
+$('lvPlayers').addEventListener('click',e=>{const b=e.target.closest('[data-lpl]');if(!b)return;state.playerId=b.dataset.lpl;render()});
+$('lvLast').addEventListener('click',e=>{const b=e.target.closest('[data-ldel]');if(!b)return;const m=cur();if(!m)return;const t=+b.dataset.ldel;
+  m.shots=(m.shots||[]).filter(s=>!(s.t===t&&(s.j||'yo')===state.playerId));saveMatch(m.id);render();toast('Tiro borrado')});
+$('lvEnd').onclick=()=>{const m=cur();const sh=liveShots(),o=compute(sh),pen=o.sit['7m'],ca=o.sit.ca;
+  const zs=o.zones.map((d,z)=>({...d,z,p:pct(d.g,d.i)})).filter(d=>d.i);const best=[...zs].sort((a,b)=>b.p-a.p||b.i-a.i)[0];
+  const tips=recommend(o).filter(t=>t.n!=='ok').slice(0,2);
+  $('lvSum').innerHTML=`<div class="in">
+    <div><div class="eyebrow">${isEnt(m)?'Entrenamiento terminado':'Partido terminado'}</div><h2 style="font-size:30px">${esc(m.nombre)}</h2><div class="hint">${esc(player().nombre||'')}</div></div>
+    <div class="row" style="gap:20px;align-items:flex-end"><div><div class="nbig" style="color:var(--good)">${o.g}</div><div class="hint">goles de ${o.n} tiros</div></div><div><div class="nbig">${o.n?pct(o.g,o.n)+'%':'–'}</div><div class="hint">efectividad</div></div></div>
+    <div class="lv-score"><div class="g"><b>${pen.g}</b><span>Penales metidos</span></div><div class="f"><b>${pen.i-pen.g}</b><span>Penales fallados</span></div><div><b>${ca.i?ca.g+'/'+ca.i:'0'}</b><span>Contraataques</span></div><div class="f"><b>${o.fue}</b><span>Fuera / poste</span></div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Dónde lanzaste</div><div class="mini">${o.zones.map((d,z)=>{const p=pct(d.g,d.i);return `<div style="${d.i?`background:${colorFor(p)};color:#fff`:''}">${d.i?`${d.g}/${d.i}<br>${p}%`:'–'}</div>`}).join('')}</div></div>
+    ${best?`<div class="tip ok"><h3>Tu mejor zona hoy: ${esc(zoneName(best.z))}</h3><p>${best.g} de ${best.i} (${best.p} %).</p></div>`:''}
+    ${tips.map(t=>`<div class="tip ${t.n}"><h3>${esc(t.h)}</h3><p>${esc(t.p)}</p></div>`).join('')}
+    <div class="row"><button class="primary big" id="sumClose">Ver estadísticas completas</button><button class="ghost big" id="sumBack">Volver a anotar</button></div>
+  </div>`;
+  $('lvSum').hidden=false;$('lvSum').scrollTop=0;
+  $('sumClose').onclick=()=>{closeLive();state.view='match';render();window.scrollTo({top:0})};
+  $('sumBack').onclick=()=>{$('lvSum').hidden=true};
+};
+/* Inicio rápido */
+function renderQuick(){const q=$('quickStart');q.hidden=!writable||local&&!state.matches.length;
+  const m=cur(),today=new Date().toLocaleDateString('en-CA');$('qsSeguir').hidden=!(m&&m.fecha===today);
+  if(m&&m.fecha===today)$('qsSeguir').textContent=`Seguir: ${m.nombre}`;}
+let qsTipo='partido';
+const ddmm=()=>new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
+function askStart(tipo){qsTipo=tipo;$('qsForm').hidden=false;$('qsNombre').value=(tipo==='entreno'?'Entrenamiento ':'Partido ')+ddmm();$('qsNombre').placeholder=tipo==='entreno'?'Nombre del entrenamiento':'Rival o nombre del partido';$('qsGo').textContent=tipo==='entreno'?'Empezar entrenamiento':'Empezar partido';$('qsNombre').focus();$('qsNombre').select()}
+$('qsPartido').onclick=()=>askStart('partido');$('qsEntreno').onclick=()=>askStart('entreno');
+$('qsCancel').onclick=()=>$('qsForm').hidden=true;
+$('qsSeguir').onclick=()=>{state.view='match';openLive()};
+$('qsForm').addEventListener('submit',e=>{e.preventDefault();const nombre=$('qsNombre').value.trim()||((qsTipo==='entreno'?'Entrenamiento ':'Partido ')+ddmm());
+  const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const m={id,nombre,tipo:qsTipo,fecha:new Date().toLocaleDateString('en-CA'),creado:Date.now(),shots:[]};
+  state.matches=[m,...state.matches];state.currentId=id;state.view='match';$('qsForm').hidden=true;saveMatch(id);openLive()});
 
 /* ---------- Eventos ---------- */
 $('goal').addEventListener('click',e=>{const g=e.target.closest('.zone');if(!g)return;const z=+g.dataset.z;state.zone=state.zone===z?null:z;render()});
@@ -847,7 +1044,7 @@ function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261009042200';
+const APP_VERSION='20261015034346';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
