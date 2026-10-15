@@ -203,9 +203,12 @@ button.big{padding:14px 18px;font-size:16px}
 .lv-frame::before{left:0}.lv-frame::after{right:0}
 .lv-goal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);aspect-ratio:3/2;max-width:100%;background:var(--surface);background-image:linear-gradient(45deg,var(--net) 1px,transparent 1px),linear-gradient(-45deg,var(--net) 1px,transparent 1px);background-size:14px 14px}
 .lv-goal button{border:1px dashed color-mix(in srgb,var(--muted) 55%,transparent);border-radius:0;background:transparent;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;font-weight:700;min-height:0;transition:background .12s}
-.lv-goal button:active,.lv-goal button.sel{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.lv-goal button:active,.lv-goal button.sel{background:color-mix(in srgb,var(--accent) 30%,transparent)!important;outline:3px solid var(--accent);outline-offset:-3px}
+.lv-goal button.hit{animation:zhit .7s ease}
+@keyframes zhit{0%{transform:scale(.92)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
 .lv-goal .zl1{font-size:clamp(11px,3.2vw,15px);text-transform:uppercase;letter-spacing:.06em}
 .lv-goal .zl2{font-size:clamp(10px,2.8vw,13px);font-weight:500;color:var(--muted)}
+.lv-goal .zn{font-size:clamp(10px,2.8vw,12px);font-weight:600;color:var(--ink)}
 .lv-goal .zc{font-family:var(--display);font-size:clamp(14px,4vw,20px);font-weight:900;padding:0 8px;border-radius:999px;color:#fff;margin-top:2px}
 .lv-floor{display:flex;justify-content:space-between;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;margin:0 calc(-1 * var(--pw));position:relative;z-index:1}
 .lv-out{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -223,7 +226,9 @@ button.big{padding:14px 18px;font-size:16px}
 .lv-sheet-b{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .lv-sheet-b button{padding:26px 8px;font-family:var(--display);font-size:28px;font-weight:900;letter-spacing:.04em;border-radius:12px}
 .lv-gol{background:var(--good);border-color:var(--good);color:#fff}
-.lv-ata{background:var(--surface2)}
+.lv-ata{background:var(--bad);border-color:var(--bad);color:#fff}
+.lv-sheet-b button small{display:block;font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:0;opacity:.9;margin-top:2px}
+.lv-sheet-q{text-align:center;font-weight:700;font-size:18px}
 .lv-flash{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:17;padding:18px 26px;border-radius:14px;font-family:var(--display);font-size:30px;font-weight:900;color:#fff;text-align:center;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:pop .9s ease forwards}
 .lv-flash small{display:block;font-family:var(--body);font-size:14px;font-weight:600;opacity:.9}
 @keyframes pop{0%{opacity:0;transform:translate(-50%,-40%) scale(.9)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
@@ -494,9 +499,10 @@ button.big{padding:14px 18px;font-size:16px}
     <div class="lv-sheet-in">
       <div class="lv-sheet-t" id="lvSheetT"></div>
       <div class="lv-sheet-s" id="lvSheetS"></div>
+      <div class="lv-sheet-q">¿Fue gol?</div>
       <div class="lv-sheet-b">
-        <button class="lv-gol" id="lvGol">GOL</button>
-        <button class="lv-ata" id="lvAta">ATAJADA</button>
+        <button class="lv-gol" id="lvGol">SÍ<small>Gol</small></button>
+        <button class="lv-ata" id="lvAta">NO<small>Atajada / fallado</small></button>
       </div>
       <button class="ghost" id="lvCancel" style="width:100%">Cancelar</button>
     </div>
@@ -842,20 +848,20 @@ function renderLive(){
   $('lvPlayers').innerHTML=all.map(p=>`<button data-lpl="${esc(p.id)}" aria-pressed="${p.id===state.playerId}">${esc(p.nombre||'Jugador')}</button>`).join('');
   $('lvSit').innerHTML=SITS.map(([k,l])=>`<button data-lsit="${k}" aria-pressed="${k===state.sit}">${l}</button>`).join('');
   $('lvPos').innerHTML=POSS.map(([k,l])=>`<button data-lpos="${k}" aria-pressed="${k===state.pos}">${l}</button>`).join('');
-  $('lvHint').textContent=state.sit==='7m'?'Penal: toca dónde fue el tiro':'Toca dónde fue el tiro';
+  $('lvHint').textContent=(state.sit==='7m'?'Penal: ':'')+'Toca la zona donde fue el tiro';
   $('lvGoal').innerHTML=[0,1,2,3,4,5,6,7,8].map(z=>{const d=o.zones[z],p=pct(d.g,d.i);
-    return `<button data-lz="${z}" class="${live.zone===z?'sel':''}" aria-label="${zoneName(z)}${d.i?`, ${d.g} de ${d.i}`:''}"><span class="zl1">${ZROW[Math.floor(z/3)].replace(' altura','')}</span><span class="zl2">${ZCOL[z%3].replace('palo ','Palo ').replace('centro','Centro')}</span>${d.i?`<span class="zc" style="background:${colorFor(p)}">${d.g}/${d.i}</span>`:''}</button>`}).join('');
+    return `<button data-lz="${z}" class="${live.zone===z?'sel':''}${live.lastZ===z?' hit':''}" style="${d.i?`background:color-mix(in srgb,${colorFor(p)} ${d.g===d.i||d.g===0?42:34}%,transparent)`:''}" aria-label="${zoneName(z)}${d.i?`, ${d.g} de ${d.i}`:''}"><span class="zl1">${ZROW[Math.floor(z/3)].replace(' altura','')}</span>${d.i?'':`<span class="zl2">${ZCOL[z%3].replace('palo ','Palo ').replace('centro','Centro')}</span>`}${d.i?`<span class="zc" style="background:${colorFor(p)}">${p}%</span><span class="zn">${d.g} de ${d.i}</span>`:''}</button>`}).join('');
   const last=sh.map((s,i)=>({s,i})).slice(-4).reverse();
-  $('lvLast').innerHTML=last.length?`<div class="eyebrow">Últimos tiros</div>`+last.map(({s})=>{const c=s.r==='gol'?'var(--good)':s.r==='ata'?'var(--warn)':'var(--bad)';
-    return `<div class="lv-shot"><span class="dot" style="background:${c}"></span><div class="tx"><b>${s.r==='gol'?'Gol':s.r==='ata'?'Atajada':'Fallado'}</b> · ${esc(shotLabel(s))}<small>${esc(sitName(s.s))} · desde ${esc(posName(s.p))}</small></div><button class="ghost" data-ldel="${s.t}">Borrar</button></div>`}).join('')
+  $('lvLast').innerHTML=last.length?`<div class="eyebrow">Últimos tiros</div>`+last.map(({s})=>{const c=s.r==='gol'?'var(--good)':'var(--bad)';
+    return `<div class="lv-shot"><span class="dot" style="background:${c}"></span><div class="tx"><b>${s.r==='gol'?'Gol':s.r==='ata'?'No gol':'Fallado'}</b> · ${esc(shotLabel(s))}<small>${esc(sitName(s.s))} · desde ${esc(posName(s.p))}</small></div><button class="ghost" data-ldel="${s.t}">Borrar</button></div>`}).join('')
     :'<p class="hint" style="text-align:center;margin:0">Aún no hay tiros. ¡Vamos!</p>';
 }
 function flash(text,sub,color){const f=$('lvFlash');f.hidden=false;f.style.background=color;f.innerHTML=`${esc(text)}<small>${esc(sub)}</small>`;f.style.animation='none';void f.offsetWidth;f.style.animation='';clearTimeout(flash._t);flash._t=setTimeout(()=>f.hidden=true,950);try{navigator.vibrate?.(35)}catch(_){}}
 function liveAdd(r,f){
   const m=cur();if(!m)return;const z=r==='fue'?-1:live.zone;if(r!=='fue'&&z==null)return;
   const shot={z,r,s:state.sit,p:state.pos,j:state.playerId,t:Date.now()};if(f)shot.f=f;
-  m.shots=[...(m.shots||[]),shot];live.zone=null;$('lvSheet').hidden=true;saveMatch(m.id);render();
-  flash(r==='gol'?'¡GOL!':r==='ata'?'ATAJADA':OUT[f].toUpperCase(),r==='fue'?sitName(state.sit):zoneName(z),r==='gol'?'var(--good)':r==='ata'?'var(--warn)':'var(--bad)');
+  m.shots=[...(m.shots||[]),shot];live.lastZ=z;live.zone=null;$('lvSheet').hidden=true;saveMatch(m.id);render();clearTimeout(live._h);live._h=setTimeout(()=>{live.lastZ=null},800);
+  flash(r==='gol'?'¡GOL!':r==='ata'?'NO FUE GOL':OUT[f].toUpperCase(),r==='fue'?sitName(state.sit):zoneName(z),r==='gol'?'var(--good)':'var(--bad)');
 }
 $('lvGoal').addEventListener('click',e=>{const b=e.target.closest('[data-lz]');if(!b)return;live.zone=+b.dataset.lz;
   $('lvSheetT').textContent=zoneName(live.zone);$('lvSheetS').textContent=`${sitName(state.sit)} · desde ${posName(state.pos)}`;$('lvSheet').hidden=false;renderLive()});
@@ -1086,7 +1092,7 @@ function showLocal(){local=true;$('logoutBtn').hidden=true;const n=$('modeNotice
   if(!state.matches.length){state.matches=[{id:'demo',nombre:'Partido de ejemplo',fecha:'',creado:0,shots:[]}];state.currentId='demo'}render()}
 setInterval(renderCountdown,6e4);
 /* ---------- Aviso de nueva versión ---------- */
-const APP_VERSION='20261015034809';
+const APP_VERSION='20261015040844';
 let newVersion=null;
 if(/[?&]v=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);
 async function checkUpdate(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const {v}=await r.json();
